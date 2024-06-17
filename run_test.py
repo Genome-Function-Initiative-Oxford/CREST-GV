@@ -17,6 +17,8 @@ collections = [ 'cad',
 				'super_pbmc'
 			   ]
 
+# collections = ['super_pbmc']
+
 genetic = "/project/Wellcome_Discovery/sriva/Git/ESVAR/genetics_test/purl.obolibrary.org_obo_GO_0035456.tsv"
 
 for collection in collections:

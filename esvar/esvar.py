@@ -1,6 +1,5 @@
 import warnings
 warnings.filterwarnings('ignore')
-
 import glob, pybedtools, sys, os, subprocess, shutil, pyBigWig, re, random
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
@@ -8,8 +7,7 @@ import multiprocessing as mp
 import seaborn as sns
 import pandas as pd
 import numpy as np
-
-from multiprocessing import Pool
+import multiprocessing as mp
 from scipy import stats
 from tqdm import tqdm
 
@@ -66,6 +64,19 @@ class esvar():
 
 
 	def __check_genetic_format(self, df_genetics):
+
+		"""\
+			Check generic format.
+
+			Parameters
+			----------
+			df_genetics : pandas.DataFrame
+				Description
+
+			Returns
+			-------
+			df_genetics : pandas.DataFrame
+		"""
 
 		if not os.path.exists(self.df_genetics):
 			sys.exit("Error, gentic file does not exist.")
@@ -124,12 +135,6 @@ class esvar():
 		df_genetics = df_genetics.reset_index(drop=True)
 		df_genetics = df_genetics[['CHR_ID', 'CHR_POS', 'CHR_POS+1', 'SNPS']]
 		df_genetics = df_genetics.drop_duplicates()
-		
-		# ### to remove - start
-		# if df_genetics.shape[0]>100:
-		# 		df_genetics = df_genetics.sample(n=100, frac=None, replace=False, weights=None, random_state=42, axis=0)
-		# 		df_genetics = df_genetics.reset_index(drop=True)
-		# ### to remove - end
 
 		if df_genetics.shape[0]<100:
 			if less100 == False:
@@ -157,7 +162,7 @@ class esvar():
 		return info, beds, bigwigs
 
 
-	def __prepare_data(self, beds):
+	def __prepare_data(self, beds, df_genetics):
 		df_data = pd.DataFrame()
 		peak_area, ps, celltypes = [], [], []
 		print("Calculating (1) total number of base-pairs within peaks and (2) total number of base-pairs within peaks divided by uniquely mappable base-pairs ...")
@@ -174,14 +179,14 @@ class esvar():
 
 		df_data["Peak_area"] = peak_area
 		df_data["p_succes"]  = ps
-		df_data.index		= celltypes
+		df_data.index		 = celltypes
 
 		if not os.path.exists(self.tmp):
 			os.makedirs(self.tmp)
 		pybedtools.set_tempdir(self.tmp)
 
 		xs = []
-		df_bed = pybedtools.BedTool.from_dataframe(self.df_genetics)
+		df_bed = pybedtools.BedTool.from_dataframe(df_genetics)
 		print("Intersecting genetic with peak regions ...")
 		for bed in tqdm(beds):
 			tmp = pd.read_csv(bed, sep="\t", names=["chrom", "start", "end"])
@@ -199,35 +204,38 @@ class esvar():
 	def __download_background(self):
 		if not os.path.exists(self.folds):
 			os.makedirs(self.folds)
-		if not os.path.exists(self.folds+os.sep+"ALL_1000_genomes.variants.%s.bed"%self.genome):
+		if not os.path.isfile(self.folds+os.sep+"ALL_1000_genomes.variants.%s.bed"%self.genome):
 			print("Downloading %s ALL 1000 genomes background..."%self.genome)
 			_ = subprocess.run('wget -P %s/ %s'%(self.folds, self.background), shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
-	def shuf(self, x):
+	def _shuf(self, x):
 			return subprocess.run(x, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
-	def __shuffle_background(self, number_of_genetic):
+	def __shuffle_background(self, number_of_genetic, idx):
 
 		print("For each fold, parallelised shuffling background ...")
 
+		if not os.path.exists(self.folds+os.sep+"round%s"%idx):
+			os.makedirs(self.folds+os.sep+"round%s"%idx)
+
 		commands = []
 		for f in range(1, self.number_of_folds+1):
-			commands.append("shuf -n %s %s | sort -k1,1 -k2,2n > %s/SUB%s.bed"%(number_of_genetic, self.folds+os.sep+"ALL_1000_genomes.variants.%s.bed"%self.genome, self.folds, f))
+			commands.append("shuf -n %s %s | sort -k1,1 -k2,2n > %s/%s/SUB%s.bed"%(number_of_genetic, self.folds+os.sep+"ALL_1000_genomes.variants.%s.bed"%self.genome, self.folds, "round%s"%idx, f))
 
-		with Pool() as pool:
-			_ = pool.map(self.shuf, commands)
+		with mp.Pool() as pool:
+			_ = pool.map(self._shuf, commands)
 
 
-	def __create_background(self, number_of_genetic): 
+	def __create_background(self, number_of_genetic, idx): 
 		self.__download_background()
-		self.__shuffle_background(number_of_genetic)
+		self.__shuffle_background(number_of_genetic, idx)
 		
 	
-	def __add_shuffled_background(self, df_data, beds): # it can be parallelised as __shuffle_background
+	def __add_shuffled_background(self, df_data, beds, idx):
 		print("Adding shuffled background ...")
-		for idx, fold in enumerate(tqdm(glob.glob("%s/SUB*.bed"%self.folds))):
+		for idx_f, fold in enumerate(tqdm(glob.glob("%s/round%s/SUB*.bed"%(self.folds, idx)))):
 			df_fold = pd.read_csv(fold, sep="\t", header=None)[[0,1,2]]
 			xs_fold = []
 			df_bed = pybedtools.BedTool.from_dataframe(df_fold)
@@ -240,7 +248,7 @@ class esvar():
 					xs_fold.append(intersect_bed.shape[0])
 				except:
 					xs_fold.append(0.0)
-			df_data["bg_%s"%(idx+1)] = xs_fold		
+			df_data["bg_%s"%(idx_f+1)] = xs_fold		
 		return df_data
 
 
@@ -264,16 +272,26 @@ class esvar():
 		shutil.rmtree(self.tmp)
 
 
+	def __parallel_background(self, idx, df_genetics):
+		number_of_genetic = df_genetics.shape[0]
+		self.__create_background(number_of_genetic, idx)
+		return idx, number_of_genetic
+
+
+	def _parallel_ces(self, idx, df_collection, number_of_genetic, beds):
+		df_collection = self.__add_shuffled_background(df_collection, beds, idx)
+		df_collection = self.__add_statistics(df_collection, number_of_genetic)
+		df_collection.to_csv(self.output+os.sep+"rounds"+os.sep+"statistics_intermediate_round%s.csv"%(idx+1), sep="\t")
+		return df_collection
+
+
 	def calculate_enrichment_score(self, less100=False):
 		if self.df_genetics is None:
 			sys.exit("Error, missing genetic file.")
 		
 		df_genetics = self.__load_genetic(less100=less100)
-		# self.df_genetics = df_genetics
-		# number_of_genetic
 
-
-		if less100:
+		if less100==True:
 			df_genetics_list = [df_genetics]
 		else:
 			df_genetics_list = []
@@ -281,38 +299,40 @@ class esvar():
 			df_genetics_init = df_genetics.sample(sub_n, random_state=self.seed)
 			df_genetics_list.append(df_genetics_init)
 			for i in range(int(df_genetics.shape[0]/sub_n)-1):
-			    if i == 0:
-			        df_genetics_rest = df_genetics[~df_genetics.index.isin(df_genetics_init.index)]
-			    else:
-			        df_genetics_rest = df_genetics_rest[~df_genetics_rest.index.isin(df_genetics_round.index)]
-			    df_genetics_round = df_genetics_rest.sample(sub_n, random_state=42)
-			    df_genetics_list.append(df_genetics_round)
+				if i == 0:
+					df_genetics_rest = df_genetics[~df_genetics.index.isin(df_genetics_init.index)]
+				else:
+					df_genetics_rest = df_genetics_rest[~df_genetics_rest.index.isin(df_genetics_round.index)]
+				df_genetics_round = df_genetics_rest.sample(sub_n, random_state=42)
+				df_genetics_list.append(df_genetics_round)
 
-		### to parallelise - start
-		dfs_collection = []
+		info, beds, _ = self.__loading_collection_data()
+		idx_list, df_collection_list, number_of_genetic_list = [], [], []
 		for idx, df_genetic in enumerate(df_genetics_list):
-			self.df_genetics = df_genetic
-			number_of_genetic = self.df_genetics.shape[0]
-			info, beds, _ = self.__loading_collection_data()
-			df_collection = self.__prepare_data(beds)
-			self.__create_background(number_of_genetic)
-			df_collection = self.__add_shuffled_background(df_collection, beds)
-			df_collection = self.__add_statistics(df_collection, number_of_genetic)
-			dfs_collection.append(df_collection[['ESVAR']])
+			df_collection = self.__prepare_data(beds, df_genetic)
+			idx_return , number_of_genetic_return = self.__parallel_background(idx, df_genetic)
+			idx_list.append(idx_return)
+			df_collection_list.append(df_collection)
+			number_of_genetic_list.append(number_of_genetic_return)
 
-			if not os.path.exists(self.output):
-				os.makedirs(self.output)
-			df_collection.to_csv(self.output+os.sep+"statistics_intermediate_round%s.csv"%(idx+1), sep="\t")
+		if not os.path.exists(self.output+os.sep+"rounds"):
+			os.makedirs(self.output+os.sep+"rounds")
 
-			self.__clean_tmp()
-			print("Processing genetics finished.")
-		### to parallelise - end
+		n_cpu = mp.cpu_count()
+		pool = mp.Pool(n_cpu)
+		_ = [pool.apply(self._parallel_ces, args=(idx, df_collection, number_of_genetic, beds)) for idx, df_collection, number_of_genetic in zip(idx_list, df_collection_list, number_of_genetic_list)]
+		# _ = [pool.apply_async(self._parallel_ces, args=(idx, df_collection, number_of_genetic, beds)) for idx, df_collection, number_of_genetic in zip(idx_list, df_collection_list, number_of_genetic_list)]
+		pool.close()
 
-		df_collection_final = pd.concat(dfs_collection, axis=1)
-		df_collection_final['ESVAR_all'] = df_collection_final.mean(axis=1)
-		df_collection_final = df_collection_final[['ESVAR_all']]
+		dfs_collection = [pd.read_csv(df_path, sep="\t", index_col=0)[['ESVAR']] for df_path in glob.glob(self.output+os.sep+"rounds"+os.sep+"*.csv")]
+		dfs_collection = pd.concat(dfs_collection, axis=1)
+		dfs_collection['ESVAR_all'] = dfs_collection.mean(axis=1)
+		dfs_collection = dfs_collection[['ESVAR_all']]
 
-		df_collection_final.to_csv(self.output+os.sep+"statistics_ESVAR.csv", sep="\t")
-		self.df_collection = df_collection_final
+		dfs_collection.to_csv(self.output+os.sep+"statistics_ESVAR.csv", sep="\t")
+		self.df_collection = dfs_collection
 
-		return df_collection
+		self.__clean_tmp()
+		print("Processing genetics finished.")
+
+		return dfs_collection
