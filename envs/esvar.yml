@@ -1,0 +1,35 @@
+name: esvar
+channels:
+  - bioconda
+  - numba
+  - anaconda
+  - conda-forge
+  - sgriva
+  - defaults
+  - plotly
+dependencies:
+  - bedtools=2.31.0=hf5e1c6e_2
+  - lanceotron=1.0.8=py_0
+  - matplotlib=3.8.0=py39h06a4308_0
+  - matplotlib-base=3.8.0=py39h1128e8f_0
+  - openssl=1.1.1s=h7f8727e_0
+  - plotly=5.9.0=py39h06a4308_0
+  - pybedtools=0.9.1=py39hd65a603_0
+  - pybigwig=0.3.18=py39h792ddb7_2
+  - python=3.9.10=h85951f9_2_cpython
+  - scipy=1.11.3=py39heeff2f4_0
+  - seaborn=0.12.2=py39h06a4308_0
+  - tqdm=4.65.0=py39hb070fc8_0
+  - jupyter=1.0.0=py39h06a4308_8
+  - jupyter_client=7.4.9=py39h06a4308_0
+  - jupyter_console=6.6.3=py39h06a4308_0
+  - jupyter_core=5.5.0=py39h06a4308_0
+  - jupyter_events=0.8.0=py39h06a4308_0
+  - jupyter_server=1.23.4=py39h06a4308_0
+  - jupyter_server_fileid=0.9.0=py39h06a4308_0
+  - jupyter_server_ydoc=0.8.0=py39h06a4308_1
+  - jupyter_ydoc=0.2.4=py39h06a4308_0
+  - jupyterlab=3.6.3=py39h06a4308_0
+  - jupyterlab_pygments=0.2.2=py39h06a4308_0
+  - jupyterlab_server=2.25.1=py39h06a4308_0
+  - jupyterlab_widgets=3.0.9=py39h06a4308_0
