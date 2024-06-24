@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 class esvar():
 	
-	def __init__(self, genetic=None, number_of_folds=5, output="output", genome="hg38", seed=42, collection_name=None):
+	def __init__(self, genetic=None, number_of_folds=5, output="output", genome="hg38", seed=42, collection_name=None, in_house_collection_path=""):
 
 		"""\
 			__init__.
@@ -33,6 +33,11 @@ class esvar():
 				Seed for reproducibility, shuffle 1000genomes excluded.
 			collection_name : str
 				Data collection name, available 'cad', 'calderon', 'catlas_fetal', 'catlas_adult', 'erythoid_d7_d10_d13_d17', 'h1_hescs', 'immune_cell', 'ludwig2019', 'mpal', 'pancreatic_pbmc', and 'super_pbmc'
+			in_house_collection_path : str
+				In house data collection path (<path-to-directory>/<collection-name>) The directory has to be structured as: └── <path-to-directory>/<collection-name>
+																																├── bigwigs/cell-type-name*.bw
+																																├── peaks/cell-type-name*.bed
+																																└── <collection-name>_info.csv # list of name present in bigwig and peak folders without extensionts (.bw and .bed)
 
 		"""
 
@@ -41,7 +46,10 @@ class esvar():
 			random.seed(self.seed)
 			np.random.seed(self.seed)
 
-		self.genetic_file = genetic
+		if os.path.isfile(genetic):
+			self.genetic_file = genetic
+		else:
+			sys.exit("Provide correct path to genetic file.")
 
 		self.genetic_df = pd.DataFrame()
 
@@ -77,11 +85,17 @@ class esvar():
 									 'super_pbmc'              : 'super_PBMC'
 									 }
 
-		if collection_name == None:
-			sys.exit("Please specify a collection name from: [%s]"%(', '.join(list(self.collection_name_dict.keys()))))
-		if collection_name not in list(self.collection_name_dict.keys()):
-			sys.exit("Wrong 'collection_name' selected, please specify a collection name from: [%s]"%(', '.join(list(self.collection_name_dict.keys()))))
-		self.collection_name = collection_name
+		if not in_house_collection_path:
+			if collection_name == None:
+				sys.exit("Please specify a collection name from: [%s]"%(', '.join(list(self.collection_name_dict.keys()))))
+			if collection_name not in list(self.collection_name_dict.keys()):
+				sys.exit("Wrong 'collection_name' selected, please specify a collection name from: [%s]"%(', '.join(list(self.collection_name_dict.keys()))))
+			self.collection_name = collection_name
+			self.collectionHouseBool = False
+		else:
+			self.in_house_collection_path = in_house_collection_path
+			self.collection_name = in_house_collection_path.split("/")[-1]
+			self.collectionHouseBool = True
 
 
 	def __check_genetic_format(self, df_genetics):
@@ -191,9 +205,12 @@ class esvar():
 			info : pandas.DataFrame
 				DataFrame of cell type names per data collection.
 		"""
-
-		file = '%s/%s/%s_info.csv'%(self.URL, self.collection_name_dict[self.collection_name], self.collection_name_dict[self.collection_name])
-		info = pd.read_csv(file, sep='\t', names=['cellType','scCounts'])[['cellType']]
+		if self.collectionHouseBool:
+			file = '%s/%s_info.csv'%(self.in_house_collection_path, self.collection_name)
+			info = pd.read_csv(file, sep='\t', names=['cellType','scCounts'])[['cellType']] # info has to contain at least the list of cell type name as per bigwig and bed name files
+		else:
+			file = '%s/%s/%s_info.csv'%(self.URL, self.collection_name_dict[self.collection_name], self.collection_name_dict[self.collection_name])
+			info = pd.read_csv(file, sep='\t', names=['cellType','scCounts'])[['cellType']]
 		return info
 
 
@@ -217,8 +234,12 @@ class esvar():
 
 		bigwigs, beds = [], []
 		for ct in info['cellType'].tolist():
-			bigwigs.append("%s/%s/bigwigs/%s.bw"%(self.URL, self.collection_name_dict[self.collection_name], ct))		
-			beds.append("%s/%s/peaks/%s_L-tron.bed"%(self.URL, self.collection_name_dict[self.collection_name], ct))
+			if self.collectionHouseBool:
+				bigwigs.append("%s/bigwigs/%s.bw"%(self.in_house_collection_path, ct))
+				beds.append("%s/peaks/%s.bed"%(self.in_house_collection_path, ct))
+			else:
+				bigwigs.append("%s/%s/bigwigs/%s.bw"%(self.URL, self.collection_name_dict[self.collection_name], ct))
+				beds.append("%s/%s/peaks/%s_L-tron.bed"%(self.URL, self.collection_name_dict[self.collection_name], ct))
 		return bigwigs, beds
 
 
@@ -417,7 +438,7 @@ class esvar():
 				DataFrame of initialised and background information for encrichment score calculation.
 			number_of_genetic : int
 				Number of variant to extract from 1000genomes.
-                
+				
 			Returns
 			-------
 			df_data : pandas.DataFrame
@@ -563,3 +584,42 @@ class esvar():
 		print("Processing genetics finished.")
 
 		return dfs_collection
+
+
+	def get_coverage(self):
+
+		"""\
+			Get coverage for the genetic variants within per selected data collection.
+
+			Returns
+			-------
+			dfs_collection : pandas.DataFrame
+				Final enrichment score DataFrame for provided genetics and selected data collection.
+		"""
+
+		self.genetic_df = self.__load_genetic(less100=False)
+		self.genetic_df['CHR_POS+1'] = self.genetic_df['CHR_POS']+1
+
+		info, bigwigs, _ = self.__loading_collection_data()
+
+		print("Getting coverage ...")
+
+		for ct in tqdm(info['cellType'].tolist()):
+			values_list = []
+			if self.collectionHouseBool:
+				bigwig = "%s/bigwigs/%s.bw"%(self.in_house_collection_path, ct)
+			else:
+				bigwig = "%s/%s/bigwigs/%s.bw"%(self.URL, self.collection_name_dict[self.collection_name], ct)
+
+			bw = pyBigWig.open(bigwig)
+			for c, s, e in zip(self.genetic_df['CHR_ID'].tolist(), self.genetic_df['CHR_POS'].tolist(), self.genetic_df['CHR_POS+1'].tolist()):
+				values_list.append(bw.values(c, s, e, numpy=True).item())
+			bw.close()
+
+			self.genetic_df[ct] = values_list
+
+		if not os.path.exists(self.output):
+			os.makedirs(self.output)
+		self.genetic_df.to_csv(self.output+os.sep+"coverage.csv", sep="\t")
+
+		return self.genetic_df
