@@ -4,184 +4,87 @@ warnings.filterwarnings('ignore')
 import sys, os, argparse
 import pandas as pd
 
-sys.path.append('ensgen/')
-from ensgen import ensgen
+sys.path.append('esvar/')
+from esvar import esvar
 from _version import __version__
+
+collection_name_dict = {'cad'                     : 'CAD',
+                        'calderon'                : 'calderon',
+                        'catlas_fetal'            : 'catlas_fetal',
+                        'catlas_adult'            : 'catlas_adult',
+                        'erythoid_d7_d10_d13_d17' : 'Days7_10_13_17',
+                        'h1_hescs'                : 'H1_hESCs',
+                        'immune_cell'             : 'immune_cell',
+                        'ludwig2019'              : 'ludwig2019',
+                        'mpal'                    : 'MPAL_lowGr',
+                        'pancreatic_pbmc'         : 'pancreatic_pbmc',
+                        'super_pbmc'              : 'super_PBMC'
+                       }
 
 
 def getArgs():
 
-    parser = argparse.ArgumentParser(description="Enrichment score for genetics", add_help=False)
+    parser = argparse.ArgumentParser(description="Enrichment Score for VARiants", add_help=False)
 
     # The required setting
-    parser.add_argument("-g", "--genetic", help="Genetics file", nargs="?", required=True, type=str)
+    parser.add_argument("-g", "--genetic", help="Path to genetic file.", nargs="?", required=True, type=str)
 
     # Optional settings
-    parser.add_argument("-t",  "--tmp",             help="Temporary folder", nargs="?", default="tmp", type=str)
-    parser.add_argument("-nf", "--number_of_folds", help="Number of folds for background generation", nargs="?", default=5, type=int)
-    parser.add_argument("-f",  "--folds",           help="Folder where to store background", nargs="?", default="folds", type=str)
-    parser.add_argument("-o",  "--output",          help="Output folder", nargs="?", default="output", type=str)
-    parser.add_argument("-gb", "--genome",          help="Genome build version", nargs="?", default="hg38", type=str)
-    parser.add_argument("-s",  "--seed",            help="Seed", nargs="?", default=42, type=int)
+    parser.add_argument("-nof",  "--number_of_folds", help="Number of folds to create backgound using the 1000genomes.", nargs="?", default=5, type=int)
+    parser.add_argument("-o",    "--output",          help="Directory where to save the scores.", nargs="?", default="output", type=str)
+    parser.add_argument("-gb",   "--genome",          help="Genome to use, available 'hg19' and 'hg38'.", nargs="?", default="hg38", type=str)
+    parser.add_argument("-s",    "--seed",            help="Seed for reproducibility, shuffle 1000genomes excluded.", nargs="?", default=42, type=int)
 
-    # Settings without a parameter value
-    parser.add_argument("--catlas-fetal",    help='Run genetic on CATLAS fetal', nargs="?", default=False, type=bool)
-    parser.add_argument("--catlas-adult",    help='Run genetic on CATLAS adult', nargs="?", default=False, type=bool)
-    parser.add_argument("--calderon",        help='Run genetic on Calderon', nargs="?", default=False, type=bool)
-    parser.add_argument("--ludwig2019",      help='Run genetic on Calderon', nargs="?", default=False, type=bool)
-    parser.add_argument("--MPAL_lowGr",      help='Run genetic on Calderon', nargs="?", default=False, type=bool)
-    parser.add_argument("--super_PBMC",      help='Run genetic on super PBMC', nargs="?", default=False, type=bool)
-    parser.add_argument("--Days7_10_13_17",  help='Run genetic on Day 7, 10, 13, and 17', nargs="?", default=False, type=bool)
-    parser.add_argument("--immune_cell",     help='Run genetic on Immune Cell', nargs="?", default=False, type=bool)
-    parser.add_argument("--pancreatic_pbmc", help='Run genetic on Pancreatic PBMC', nargs="?", default=False, type=bool)
-    parser.add_argument("--H1_hESCs",        help='Run genetic on H1 hESCs', nargs="?", default=False, type=bool)
-    parser.add_argument("--CAD",             help='Run genetic on CAD', nargs="?", default=False, type=bool)
+    # Optional settings (choose one or the other)
+    parser.add_argument("-cn",   "--collection_name",          help="Data collection name, available 'cad', 'calderon', 'catlas_fetal', 'catlas_adult', 'erythoid_d7_d10_d13_d17', 'h1_hescs', 'immune_cell', 'ludwig2019', 'mpal', 'pancreatic_pbmc', and 'super_pbmc'.", nargs="?", default="", type=str)
+    parser.add_argument("-incp", "--in_house_collection_path", help="In house data collection path (<path-to-directory>/<collection-name>).", nargs="?", default="", type=str)
+
+    # Optional settings when list of variants is less than 100
+    parser.add_argument("-l100", "--less100", help="Boolean variable to force the software to run also with less than 100 variants per file.", nargs="?", default=False, type=bool)
+
+    # Optional settings when list of variants is greater than 25,000
+    parser.add_argument("-g25k", "--greater25k", help="Boolean variable to check if you want to run ESVAR on more than 25k variants.", nargs="?", default=False, type=bool)
+
+    # Optional settings for running only coverage calculation.
+    parser.add_argument("-gc", "--get_coverage", help="Run only coverage calculation. Enrichment score will be ignored.", nargs="?", default=True, type=bool)
+
+    # Optional settings for running ESVAR for all data collection.
+    parser.add_argument("-ra", "--run_all", help="Run ESVAR for all data collection. If -cn or -incp are set, they will be ignored.", nargs="?", default=False, type=bool)
 
     args = vars(parser.parse_args())
 
     return args
 
 
-
 def main():
     args = getArgs()
 
-    if args["catlas-adult"]:
-        es = ensgen(
-                    genetic=args["genetic"], 
-                    tmp=args['tmp'], 
-                    number_of_folds=args['number_of_folds'],
-                    folds=args['folds'],
-                    output=args['output'],
-                    genome=args['genome'],
-                    seed=args['seed'])
-        df = es.process_genetics_for_catlas(origin='adult')#, umap=True
-        es.plot_genetics_for_catlas(show=False)
-        # es.multicoverage_genetics_for_catlas(origin='adult')
+    if args["run_all"]:
+        for collection_i in list(collection_name_dict.keys()):
+            es = esvar(genetic=args["genetic"], 
+                       number_of_folds=args["number_of_folds"], 
+                       output=args["output"]+os.sep+collection_i, 
+                       genome=args["genome"], 
+                       seed=args["seed"], 
+                       collection_name=args["collection_name"],
+                       in_house_collection_path=args["in_house_collection_path"]
+                      )
+            if args["get_coverage"]:
+                _ = es.calculate_enrichment_score(less100=args["less100"], greater25k=args["greater25k"])
+            _ = es.get_coverage()
+    else:
+        es = esvar(genetic=args["genetic"], 
+                   number_of_folds=args["number_of_folds"], 
+                   output=args["output"], 
+                   genome=args["genome"], 
+                   seed=args["seed"], 
+                   collection_name=args["collection_name"],
+                   in_house_collection_path=args["in_house_collection_path"]
+                  )
+        if args["get_coverage"]:
+            _ = es.calculate_enrichment_score(less100=args["less100"], greater25k=args["greater25k"])
+        _ = es.get_coverage()
 
-    if args["catlas-fetal"]:
-        es = ensgen(
-                    genetic=args["genetic"], 
-                    tmp=args['tmp'], 
-                    number_of_folds=args['number_of_folds'],
-                    folds=args['folds'],
-                    output=args['output'],
-                    genome=args['genome'],
-                    seed=args['seed'])
-        df = es.process_genetics_for_catlas(origin='fetal')#, umap=True
-        es.plot_genetics_for_catlas(show=False)
-        # es.multicoverage_genetics_for_catlas(origin='fetal')
-
-    if args["calderon"]:
-        es = ensgen(
-                    genetic=args["genetic"], 
-                    tmp=args['tmp'], 
-                    number_of_folds=args['number_of_folds'],
-                    folds=args['folds'],
-                    output=args['output'],
-                    genome=args['genome'],
-                    seed=args['seed'])
-        df = es.process_genetics_for_calderon()
-        es.plot_genetics_for_calderon(show=False)
-        # es.multicoverage_genetics_for_calderon()
-
-    if args["ludwig2019"]:
-        es = ensgen(
-                    genetic=args["genetic"], 
-                    tmp=args['tmp'], 
-                    number_of_folds=args['number_of_folds'],
-                    folds=args['folds'],
-                    output=args['output'],
-                    genome=args['genome'],
-                    seed=args['seed'])
-        df = es.process_genetics_for_ludwig2019()
-        es.plot_genetics_for_ludwig2019(show=False)
-        # es.multicoverage_genetics_for_ludwig2019()
-
-    if args["MPAL_lowGr"]:
-        es = ensgen(
-                    genetic=args["genetic"], 
-                    tmp=args['tmp'], 
-                    number_of_folds=args['number_of_folds'],
-                    folds=args['folds'],
-                    output=args['output'],
-                    genome=args['genome'],
-                    seed=args['seed'])
-        df = es.process_genetics_for_MPAL_lowGr()
-        es.plot_genetics_for_MPAL_lowGr(show=False)#, umap=True
-        # es.multicoverage_genetics_for_MPAL_lowGr()
-
-    if args["super_PBMC"]:
-        es = ensgen(
-                    genetic=args["genetic"], 
-                    tmp=args['tmp'], 
-                    number_of_folds=args['number_of_folds'],
-                    folds=args['folds'],
-                    output=args['output'],
-                    genome=args['genome'],
-                    seed=args['seed'])
-        df = es.process_genetics_for_super_PBMC()
-        es.plot_genetics_for_super_PBMC(show=False, umap=True)
-
-    if args["Days7_10_13_17"]:
-        es = ensgen(
-                    genetic=args["genetic"], 
-                    tmp=args['tmp'], 
-                    number_of_folds=args['number_of_folds'],
-                    folds=args['folds'],
-                    output=args['output'],
-                    genome=args['genome'],
-                    seed=args['seed'])
-        df = es.process_genetics_for_Days7_10_13_17()
-        es.plot_genetics_for_Days7_10_13_17(show=False)
-
-    if args["immune_cell"]:
-        es = ensgen(
-                    genetic=args["genetic"], 
-                    tmp=args['tmp'], 
-                    number_of_folds=args['number_of_folds'],
-                    folds=args['folds'],
-                    output=args['output'],
-                    genome=args['genome'],
-                    seed=args['seed'])
-        df = es.process_genetics_for_immune_cell()
-        es.plot_genetics_for_immune_cell(show=False)
-
-    if args["pancreatic_pbmc"]:
-        es = ensgen(
-                    genetic=args["genetic"], 
-                    tmp=args['tmp'], 
-                    number_of_folds=args['number_of_folds'],
-                    folds=args['folds'],
-                    output=args['output'],
-                    genome=args['genome'],
-                    seed=args['seed'])
-        df = es.process_genetics_for_pancreatic_pbmc()
-        es.plot_genetics_for_pancreatic_pbmc(show=False)
-
-    if args["H1_hESCs"]:
-        es = ensgen(
-                    genetic=args["genetic"], 
-                    tmp=args['tmp'], 
-                    number_of_folds=args['number_of_folds'],
-                    folds=args['folds'],
-                    output=args['output'],
-                    genome=args['genome'],
-                    seed=args['seed'])
-        df = es.process_genetics_for_H1_hESCs()
-        es.plot_genetics_for_H1_hESCs(show=False)
-
-    if args["CAD"]:
-        es = ensgen(
-                    genetic=args["genetic"], 
-                    tmp=args['tmp'], 
-                    number_of_folds=args['number_of_folds'],
-                    folds=args['folds'],
-                    output=args['output'],
-                    genome=args['genome'],
-                    seed=args['seed'])
-        df = es.process_genetics_for_CAD()
-        es.plot_genetics_for_CAD(show=False, umap=True)
 
 if __name__ == "__main__":
 

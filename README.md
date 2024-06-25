@@ -3,6 +3,7 @@
 Enrichment Score for VARiants
 
 
+### edit readme
 
 For the time being, it is working only in CentOS (CEPH)
 Module to load:
@@ -103,7 +104,7 @@ es.plot_genetics_enrichments(groupA=groupA, groupB=groupB, show=False)
 
 ```
 # catlas adult
-python ensgen.py --catlas-adult True -g <path>/<file>.<ext> -o api```
+python ensgen.py --catlas-adult True -g <path>/<file>.<ext> -o api
 
 # catlas fetal
 python ensgen.py --catlas-fetal True -g <path>/<file>.<ext> -o api
@@ -116,4 +117,9 @@ python ensgen.py --ludwig2019 True -g <path>/<file>.<ext> -o api
 
 # MPAL_lowGr
 python ensgen.py --MPAL_lowGr True -g <path>/<file>.<ext> -o api
+
+
+python esvar.py -g /project/Wellcome_Discovery/sriva/Git/ESVAR/genetics_test/Bcell_GO_0035456.tsv -cn super_pbmc -o output_api
+
+
 ```
