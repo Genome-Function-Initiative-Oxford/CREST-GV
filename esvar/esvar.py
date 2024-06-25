@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 class esvar():
 	
-	def __init__(self, genetic=None, number_of_folds=5, output="output", genome="hg38", seed=42, collection_name=None, in_house_collection_path=""):
+	def __init__(self, genetic=None, number_of_folds=5, output="output", genome="hg38", seed=42, collection_name="", in_house_collection_path=""):
 
 		"""\
 			__init__.
@@ -32,7 +32,7 @@ class esvar():
 			seed : int
 				Seed for reproducibility, shuffle 1000genomes excluded.
 			collection_name : str
-				Data collection name, available 'cad', 'calderon', 'catlas_fetal', 'catlas_adult', 'erythoid_d7_d10_d13_d17', 'h1_hescs', 'immune_cell', 'ludwig2019', 'mpal', 'pancreatic_pbmc', and 'super_pbmc'
+				Data collection name, available 'cad', 'calderon', 'catlas_fetal', 'catlas_adult', 'erythoid_d7_d10_d13_d17', 'h1_hescs', 'immune_cell', 'ludwig2019', 'mpal', 'pancreatic_pbmc', and 'super_pbmc'.
 			in_house_collection_path : str
 				In house data collection path (<path-to-directory>/<collection-name>) The directory has to be structured as: └── <path-to-directory>/<collection-name>
 																																├── bigwigs/cell-type-name*.bw
@@ -85,8 +85,10 @@ class esvar():
 									 'super_pbmc'              : 'super_PBMC'
 									 }
 
-		if not in_house_collection_path:
-			if collection_name == None:
+		if (not in_house_collection_path) & (not collection_name):
+			sys.exit("Please specify a collection name or a in house collection path.")
+		elif not in_house_collection_path:
+			if collection_name == "":
 				sys.exit("Please specify a collection name from: [%s]"%(', '.join(list(self.collection_name_dict.keys()))))
 			if collection_name not in list(self.collection_name_dict.keys()):
 				sys.exit("Wrong 'collection_name' selected, please specify a collection name from: [%s]"%(', '.join(list(self.collection_name_dict.keys()))))
@@ -157,7 +159,7 @@ class esvar():
 		return df_genetics
 
 
-	def __load_genetic(self, less100=False):
+	def __load_genetic(self, less100=False, greater25k=False):
 
 		"""\
 			Load genetic.
@@ -166,6 +168,8 @@ class esvar():
 			----------
 			less100 : Boolean
 				Boolean variable to force the software to run also with less than 100 variants per file.
+			greater25k : Boolean
+				Boolean variable to check if you want to run ESVAR on more than 25k variants.
 
 			Returns
 			-------
@@ -187,11 +191,14 @@ class esvar():
 		df_genetics = df_genetics[['CHR_ID', 'CHR_POS', 'CHR_POS+1', 'SNPS']]
 		df_genetics = df_genetics.drop_duplicates()
 
-		if df_genetics.shape[0]<100:
-			if less100 == False:
-				sys.exit("Genetics provided after quality control contains less than the minimum number (100 variants) of entries.\nIf you want to carry on anyway with it, please set 'less100=True'.")
+		print(df_genetics.shape[0])
+		if (df_genetics.shape[0]>25000) & (not greater25k):
+			sys.exit("Genetics provided after quality control contains more than 25k entry variants.\nIf you want to carry on anyway with it, please set 'greater25k=True'.\nIf this is the case, it might take hours if not days to compute the ESVAR scores!")
+		
+		if (df_genetics.shape[0]<100) & (not less100):
+			sys.exit("Genetics provided after quality control contains less than the minimum number (100 variants) of entries.\nIf you want to carry on anyway with it, please set 'less100=True'.")
 
-			self.genetic_df = df_genetics
+		self.genetic_df = df_genetics
 		return df_genetics
 
 
@@ -519,7 +526,7 @@ class esvar():
 		return df_collection
 
 
-	def calculate_enrichment_score(self, less100=False):
+	def calculate_enrichment_score(self, less100=False, greater25k=False):
 
 		"""\
 			Calculate enrichment score for provided genetics per selected data collection.
@@ -528,6 +535,8 @@ class esvar():
 			----------
 			less100 : Boolean
 				Boolean variable to force the software to run also with less than 100 variants per file.
+			greater25k : Boolean
+				Boolean variable to check if you want to run ESVAR on more than 25k variants.
 
 			Returns
 			-------
@@ -538,9 +547,9 @@ class esvar():
 		if self.genetic_file is None:
 			sys.exit("Error, missing genetic file.")
 		
-		df_genetics = self.__load_genetic(less100=less100)
+		df_genetics = self.__load_genetic(less100=less100, greater25k=greater25k)
 
-		if less100==True:
+		if (less100) & (df_genetics.shape[0]<100):
 			df_genetics_list = [df_genetics]
 		else:
 			df_genetics_list = []
@@ -597,7 +606,7 @@ class esvar():
 				Final enrichment score DataFrame for provided genetics and selected data collection.
 		"""
 
-		self.genetic_df = self.__load_genetic(less100=False)
+		self.genetic_df = self.__load_genetic(less100=True)
 		self.genetic_df['CHR_POS+1'] = self.genetic_df['CHR_POS']+1
 
 		info, bigwigs, _ = self.__loading_collection_data()

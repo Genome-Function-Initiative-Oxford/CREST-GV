@@ -17,10 +17,9 @@ collections = [ 'cad',
 				'super_pbmc'
 			   ]
 
-# collections = ['super_pbmc']
-
-genetic = "/project/Wellcome_Discovery/sriva/Git/ESVAR/genetics_test/purl.obolibrary.org_obo_GO_0035456.tsv"
+genetic = "/project/Wellcome_Discovery/sriva/Git/ESVAR/genetics_test/Bcell_GO_0035456.tsv"
 
 for collection in collections:
 	es = esvar(genetic=genetic, output="test/%s"%collection, collection_name=collection)
-	df = es.calculate_enrichment_score(less100=False)
+	_ = es.calculate_enrichment_score(less100=False)
+	_ = es.get_coverage()
