@@ -68,7 +68,7 @@ sys.path.append('esvar/')
 from esvar import esvar
 
 genetic  = "genetics_test/Bcell_GO_0035456.tsv"
-es       = esvar(genetic=genetic, output="Test", collection_name="cad")
+es       = esvar(genetic=genetic, output="Test", collection_name="super-pbmc")
 df_esvar = es.calculate_enrichment_score(less100=False, greater25k=False)
 df_cover = es.get_coverage()
 ```
@@ -78,6 +78,8 @@ You can find some helpful parameter information using:
 es = esvar(genetic=genetic)
 help(es)
 ```
+
+We created a Jupyter Notebook with a heatmap plot as ESVAR example run (see [heatmap_test.ipynb](https://github.com/Genome-Function-Initiative-Oxford/ESVAR/blob/main/heatmap_test.ipynb)).
 
 #### 2) from a terminal:
 - for a single data collection ```python esvar.py -g genetics_test/Bcell_GO_0035456.tsv -cn super_pbmc -o test_api/single_run```
