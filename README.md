@@ -83,9 +83,9 @@ help(es)
 - for a single data collection ```python esvar.py -g genetics_test/Bcell_GO_0035456.tsv -cn super_pbmc -o test_api/single_run```
 - for all data collection ```python esvar.py -g genetics_test/Bcell_GO_0035456.tsv -cn super_pbmc -o test_api/all_run -ra True```
 
-Here some usage information"
+Here some usage information
 ```
-usage: esvar.py 
+usage: esvar.py \
 	-g/--genetic [Required. Path to genetic file.] : str \
 	-nof/--number_of_folds [Number of folds to create backgound using the 1000genomes.] : int \
 	-o/--output [Directory where to save the scores.]  : str \
@@ -111,17 +111,17 @@ ESVAR_result
 ├── coverage.csv
 ├── folds
 │	├── ALL_1000_genomes.variants.hg38.bed
-│	├── round1
-│	│	├── SUB1.bed
-│	│	├── SUBk.bed
-│	│	└── SUBnof.bed
+│	├── round_1
+│	│	├── SUB_1.bed
+│	│	├── SUB_k.bed
+│	│	└── SUB_nof.bed
 │	└── roundk
-│		├── SUB1.bed
-│		├── SUBk.bed
-│		└── SUBnof.bed
+│		├── SUB_1.bed
+│		├── SUB_k.bed
+│		└── SUB_nof.bed
 ├── rounds
-│	├── statistics_intermediate_round1.csv
-│	└── statistics_intermediate_roundk.csv
+│	├── statistics_intermediate_round_1.csv
+│	└── statistics_intermediate_round_k.csv
 └── statistics_ESVAR.csv
 ```
 
@@ -140,7 +140,7 @@ For example like:
 CHR_ID  CHR_POS SNPS
 chr10   801748  rs60692108
 chr10   823912  rs74876360
-chr10   840700  rs34332137
+chr10   840700  chr10-840700-A-C
 ```
 
 ***
@@ -185,39 +185,3 @@ When using this repository, use the default terminal and __do not__ load any mod
 If you have any suggestions, spot any errors, or have any questions regarding the pipelines, please do no hesitate to contact us anytime.   
 
 :email: &emsp; [<simone.riva@imm.ox.ac.uk>](simone.riva@imm.ox.ac.uk)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
---- From terminal on Jupyter Notebook ---
-
-```
-import pandas as pd
-import sys
-sys.path.append('esvar/')
-from esvar import esvar
-
-genetic  = "/project/Wellcome_Discovery/sriva/Git/ESVAR/genetics_test/Bcell_GO_0035456.tsv"
-es       = esvar(genetic=genetic, output="Test", collection_name="cad")
-df_esvar = es.calculate_enrichment_score(less100=False, greater25k=False)
-df_cover = es.get_coverage()
-```
-
-
---- From API ---
-
-```
-python esvar.py -g /project/Wellcome_Discovery/sriva/Git/ESVAR/genetics_test/Bcell_GO_0035456.tsv -cn super_pbmc -o test_api/single_run
-python esvar.py -g /project/Wellcome_Discovery/sriva/Git/ESVAR/genetics_test/Bcell_GO_0035456.tsv -cn super_pbmc -o test_api/all_run -ra True
-
-```
