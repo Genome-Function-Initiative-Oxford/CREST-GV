@@ -110,42 +110,42 @@ ESVAR will create the following tree-like format result (see [heatmap_test folde
 heatmap_test
 ├── coverage.csv
 ├── folds
-│ ├── round0
-│ │ ├── SUB1.bed
-│ │ ├── SUB2.bed
-│ │ ├── SUB3.bed
-│ │ ├── SUB4.bed
-│ │ └── SUB5.bed
-│ ├── round1
-│ │ ├── SUB1.bed
-│ │ ├── SUB2.bed
-│ │ ├── SUB3.bed
-│ │ ├── SUB4.bed
-│ │ └── SUB5.bed
-│ ├── round2
-│ │ ├── SUB1.bed
-│ │ ├── SUB2.bed
-│ │ ├── SUB3.bed
-│ │ ├── SUB4.bed
-│ │ └── SUB5.bed
-│ ├── round3
-│ │ ├── SUB1.bed
-│ │ ├── SUB2.bed
-│ │ ├── SUB3.bed
-│ │ ├── SUB4.bed
-│ │ └── SUB5.bed
-│ └── round4
-│   ├── SUB1.bed
-│   ├── SUB2.bed
-│   ├── SUB3.bed
-│   ├── SUB4.bed
-│   └── SUB5.bed
+│   ├── round0
+│   │   ├── SUB1.bed
+│   │   ├── SUB2.bed
+│   │   ├── SUB3.bed
+│   │   ├── SUB4.bed
+│   │   └── SUB5.bed
+│   ├── round1
+│   │   ├── SUB1.bed
+│   │   ├── SUB2.bed
+│   │   ├── SUB3.bed
+│   │   ├── SUB4.bed
+│   │   └── SUB5.bed
+│   ├── round2
+│   │   ├── SUB1.bed
+│   │   ├── SUB2.bed
+│   │   ├── SUB3.bed
+│   │   ├── SUB4.bed
+│   │   └── SUB5.bed
+│   ├── round3
+│   │   ├── SUB1.bed
+│   │   ├── SUB2.bed
+│   │   ├── SUB3.bed
+│   │   ├── SUB4.bed
+│   │   └── SUB5.bed
+│   └── round4
+│       ├── SUB1.bed
+│       ├── SUB2.bed
+│       ├── SUB3.bed
+│       ├── SUB4.bed
+│       └── SUB5.bed
 ├── rounds
-│ ├── statistics_intermediate_round1.csv
-│ ├── statistics_intermediate_round2.csv
-│ ├── statistics_intermediate_round3.csv
-│ ├── statistics_intermediate_round4.csv
-│ └── statistics_intermediate_round5.csv
+│   ├── statistics_intermediate_round1.csv
+│   ├── statistics_intermediate_round2.csv
+│   ├── statistics_intermediate_round3.csv
+│   ├── statistics_intermediate_round4.csv
+│   └── statistics_intermediate_round5.csv
 └── statistics_ESVAR.csv
 ```
 
