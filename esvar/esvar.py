@@ -191,7 +191,6 @@ class esvar():
 		df_genetics = df_genetics[['CHR_ID', 'CHR_POS', 'CHR_POS+1', 'SNPS']]
 		df_genetics = df_genetics.drop_duplicates()
 
-		print(df_genetics.shape[0])
 		if (df_genetics.shape[0]>25000) & (not greater25k):
 			sys.exit("Genetics provided after quality control contains more than 25k entry variants.\nIf you want to carry on anyway with it, please set 'greater25k=True'.\nIf this is the case, it might take hours if not days to compute the ESVAR scores!")
 		
