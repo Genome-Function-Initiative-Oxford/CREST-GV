@@ -1,6 +1,6 @@
 # ESVAR - Enrichment Score for genetic VARiants
 
-ESVAR is a method which allows querying a data collection of ~490 cell types (we keep piling more data to add to the data collection) to determine the enrichment score of a set of genetic variants. ESVAR rely on peak properties for each cell type in the data collection leveraging [LanceOtron](https://github.com/LHentges/LanceOtron) peak caller.
+ESVAR is a method which allows querying [our described data collection](https://github.com/Genome-Function-Initiative-Oxford/ESVAR/blob/main/our_collection/data_collection.txt) of ~490 cell types (we keep piling more data to add to the data collection) to determine the enrichment score of a set of genetic variants. ESVAR rely on peak properties for each cell type in the data collection leveraging [LanceOtron](https://github.com/LHentges/LanceOtron) peak caller.
 ESVAR can also query your personal (in-house) data where formatted correctly (see [In-house data format](#In-house-data-format) section for a properly formatted data structure), in this case, the user can rely on the peak caller of their own choice.
 The only mandatory input for the tool is the path of a genetic file, stored following the format shown in [Genetic variant file format](#genetic-variant-file-format) section.
 
@@ -104,24 +104,48 @@ usage: esvar.py \
 
 ### Output ESVAR result
 
-ESVAR will create the following tree-like format example result.
+ESVAR will create the following tree-like format result (see [heatmap_test folder](https://github.com/Genome-Function-Initiative-Oxford/ESVAR/tree/main/heatmap_test) example).
 
 ```
-ESVAR_result
+heatmap_test
 ├── coverage.csv
 ├── folds
-│	├── ALL_1000_genomes.variants.hg38.bed
-│	├── round_1
-│	│	├── SUB_1.bed
-│	│	├── SUB_k.bed
-│	│	└── SUB_nof.bed
-│	└── roundk
-│		├── SUB_1.bed
-│		├── SUB_k.bed
-│		└── SUB_nof.bed
+│ ├── round0
+│ │ ├── SUB1.bed
+│ │ ├── SUB2.bed
+│ │ ├── SUB3.bed
+│ │ ├── SUB4.bed
+│ │ └── SUB5.bed
+│ ├── round1
+│ │ ├── SUB1.bed
+│ │ ├── SUB2.bed
+│ │ ├── SUB3.bed
+│ │ ├── SUB4.bed
+│ │ └── SUB5.bed
+│ ├── round2
+│ │ ├── SUB1.bed
+│ │ ├── SUB2.bed
+│ │ ├── SUB3.bed
+│ │ ├── SUB4.bed
+│ │ └── SUB5.bed
+│ ├── round3
+│ │ ├── SUB1.bed
+│ │ ├── SUB2.bed
+│ │ ├── SUB3.bed
+│ │ ├── SUB4.bed
+│ │ └── SUB5.bed
+│ └── round4
+│   ├── SUB1.bed
+│   ├── SUB2.bed
+│   ├── SUB3.bed
+│   ├── SUB4.bed
+│   └── SUB5.bed
 ├── rounds
-│	├── statistics_intermediate_round_1.csv
-│	└── statistics_intermediate_round_k.csv
+│ ├── statistics_intermediate_round1.csv
+│ ├── statistics_intermediate_round2.csv
+│ ├── statistics_intermediate_round3.csv
+│ ├── statistics_intermediate_round4.csv
+│ └── statistics_intermediate_round5.csv
 └── statistics_ESVAR.csv
 ```
 
@@ -147,13 +171,19 @@ chr10   840700  chr10-840700-A-C
 
 ### In-house data format
 
-All the data has to be stored in a folder called with your collection name __<collection-name>__, following the tree-like format example below.
+All the data has to be stored in a folder called with your collection name __<collection-name>__, following the tree-like format example below (see [example_files/in-house-data folder](https://github.com/Genome-Function-Initiative-Oxford/ESVAR/tree/main/example_files/in-house-data) example), where *in-house-data* is the *collection name*.
 
 ```
-└── <path-to-directory>/<collection-name>
- ├── bigwigs/cell-type-name*.bw
- ├── peaks/cell-type-name*.bed
- └── <collection-name>_info.csv 
+example_files/in-house-data/
+├── bigwigs
+│   ├── cell_type_1.bw
+│   ├── cell_type_2.bw
+│   └── cell_type_3.bw
+├── in-house-data_info.csv
+└── peaks
+    ├── cell_type_1.bed
+    ├── cell_type_2.bed
+    └── cell_type_3.bed
 ```
 
 ***
