@@ -85,17 +85,18 @@ help(es)
 
 Here some usage information"
 ```
-usage: esvar.py -g/--genetic [Required. Path to genetic file.] : str \
-				-nof/--number_of_folds [Number of folds to create backgound using the 1000genomes.] : int \
-				-o/--output [Directory where to save the scores.]  : str \
-				-gb/--genome [Genome to use, available 'hg19' and 'hg38'.] : str \
-				-s/--seed [Seed for reproducibility, shuffle 1000genomes excluded.] : int \
-				-cn/--collection_name [Data collection name, available 'cad', 'calderon', 'catlas_fetal', 'catlas_adult', 'erythoid_d7_d10_d13_d17', 'h1_hescs', 'immune_cell', 'ludwig2019', 'mpal', 'pancreatic_pbmc', and 'super_pbmc'.] : str \
-				-incp/--in_house_collection_path [In house data collection path (<path-to-directory>/<collection-name>).] : str \
-				-l100/--less100 [Boolean variable to force the software to run also with less than 100 variants per file.] : bool \
-				-g25k/--greater25k [Boolean variable to check if you want to run ESVAR on more than 25k variants.] : bool \
-				-gc/--get_coverage [Run only coverage calculation. Enrichment score will be ignored.] : bool \
-				-ra/--run_all [Run ESVAR for all data collection. If -cn or -incp are set, they will be ignored.] : bool
+usage: esvar.py 
+	-g/--genetic [Required. Path to genetic file.] : str \
+	-nof/--number_of_folds [Number of folds to create backgound using the 1000genomes.] : int \
+	-o/--output [Directory where to save the scores.]  : str \
+	-gb/--genome [Genome to use, available 'hg19' and 'hg38'.] : str \
+	-s/--seed [Seed for reproducibility, shuffle 1000genomes excluded.] : int \
+	-cn/--collection_name [Data collection name, available 'cad', 'calderon', 'catlas_fetal', 'catlas_adult', 'erythoid_d7_d10_d13_d17', 'h1_hescs', 'immune_cell', 'ludwig2019', 'mpal', 'pancreatic_pbmc', and 'super_pbmc'.] : str \
+	-incp/--in_house_collection_path [In house data collection path (<path-to-directory>/<collection-name>).] : str \
+	-l100/--less100 [Boolean variable to force the software to run also with less than 100 variants per file.] : bool \
+	-g25k/--greater25k [Boolean variable to check if you want to run ESVAR on more than 25k variants.] : bool \
+	-gc/--get_coverage [Run only coverage calculation. Enrichment score will be ignored.] : bool \
+	-ra/--run_all [Run ESVAR for all data collection. If -cn or -incp are set, they will be ignored.] : bool
 
 ```
 
