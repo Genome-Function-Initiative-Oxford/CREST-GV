@@ -68,7 +68,7 @@ sys.path.append('esvar/')
 from esvar import esvar
 
 genetic  = "genetics_test/Bcell_GO_0035456.tsv"
-es       = esvar(genetic=genetic, output="Test", collection_name="super-pbmc")
+es       = esvar(genetic=genetic, output="Test", collection_name="super_pbmc")
 df_esvar = es.calculate_enrichment_score(less100=False, greater25k=False)
 df_cover = es.get_coverage()
 ```
@@ -83,7 +83,7 @@ We created a Jupyter Notebook with a heatmap plot as ESVAR example run (see [hea
 
 #### 2) from a terminal:
 - for a single data collection ```python esvar.py -g genetics_test/Bcell_GO_0035456.tsv -cn super_pbmc -o test_api/single_run```
-- for all data collection ```python esvar.py -g genetics_test/Bcell_GO_0035456.tsv -cn super_pbmc -o test_api/all_run -ra True```
+- for all data collection ```python esvar.py -g genetics_test/Bcell_GO_0035456.tsv -o test_api/all_run -ra True```
 
 Here some usage information
 ```
