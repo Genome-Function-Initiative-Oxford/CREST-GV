@@ -197,6 +197,7 @@ class esvar():
 		if (df_genetics.shape[0]<100) & (not less100):
 			sys.exit("Genetics provided after quality control contains less than the minimum number (100 variants) of entries.\nIf you want to carry on anyway with it, please set 'less100=True'.")
 
+		print("Total number of used variants in ESVAR: %s"%df_genetics.shape[0])
 		self.genetic_df = df_genetics
 		return df_genetics
 
@@ -605,7 +606,7 @@ class esvar():
 				Final enrichment score DataFrame for provided genetics and selected data collection.
 		"""
 
-		self.genetic_df = self.__load_genetic(less100=True)
+		self.genetic_df = self.__load_genetic(less100=True, greater25k=True)
 		self.genetic_df['CHR_POS+1'] = self.genetic_df['CHR_POS']+1
 
 		info, bigwigs, _ = self.__loading_collection_data()
