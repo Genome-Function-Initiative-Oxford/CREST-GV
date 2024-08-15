@@ -5,7 +5,7 @@ import sys, os, argparse
 import pandas as pd
 
 sys.path.append('esvar/')
-from esvar import esvar
+from crestgv import crestgv
 from _version import __version__
 
 collection_name_dict = {'cad'                     : 'CAD',
@@ -43,13 +43,13 @@ def getArgs():
     parser.add_argument("-l100", "--less100", help="Boolean variable to force the software to run also with less than 100 variants per file.", nargs="?", default=False, type=bool)
 
     # Optional settings when list of variants is greater than 25,000
-    parser.add_argument("-g25k", "--greater25k", help="Boolean variable to check if you want to run ESVAR on more than 25k variants.", nargs="?", default=False, type=bool)
+    parser.add_argument("-g25k", "--greater25k", help="Boolean variable to check if you want to run CREST-GV on more than 25k variants.", nargs="?", default=False, type=bool)
 
     # Optional settings for running only coverage calculation.
     parser.add_argument("-gc", "--get_coverage", help="Run only coverage calculation. Enrichment score will be ignored.", nargs="?", default=True, type=bool)
 
-    # Optional settings for running ESVAR for all data collection.
-    parser.add_argument("-ra", "--run_all", help="Run ESVAR for all data collection. If -cn or -incp are set, they will be ignored.", nargs="?", default=False, type=bool)
+    # Optional settings for running CREST-GV for all data collection.
+    parser.add_argument("-ra", "--run_all", help="Run CREST-GV for all data collection. If -cn or -incp are set, they will be ignored.", nargs="?", default=False, type=bool)
 
     args = vars(parser.parse_args())
 
@@ -61,19 +61,19 @@ def main():
 
     if args["run_all"]:
         for collection_i in list(collection_name_dict.keys()):
-            es = esvar(genetic=args["genetic"], 
-                       number_of_folds=args["number_of_folds"], 
-                       output=args["output"]+os.sep+collection_i, 
-                       genome=args["genome"], 
-                       seed=args["seed"], 
-                       collection_name=collection_i,
-                       in_house_collection_path=""
-                      )
+            cgv = crestgv(genetic=args["genetic"], 
+                         number_of_folds=args["number_of_folds"], 
+                         output=args["output"]+os.sep+collection_i, 
+                         genome=args["genome"], 
+                         seed=args["seed"], 
+                         collection_name=args["collection_name"],
+                         in_house_collection_path=args["in_house_collection_path"]
+                        )
             if args["get_coverage"]:
-                _ = es.calculate_enrichment_score(less100=args["less100"], greater25k=args["greater25k"])
-            _ = es.get_coverage()
+                _ = cgv.calculate_enrichment_score(less100=args["less100"], greater25k=args["greater25k"])
+            _ = cgv.get_coverage()
     else:
-        es = esvar(genetic=args["genetic"], 
+        cgv = crestgv(genetic=args["genetic"], 
                    number_of_folds=args["number_of_folds"], 
                    output=args["output"], 
                    genome=args["genome"], 
@@ -82,8 +82,8 @@ def main():
                    in_house_collection_path=args["in_house_collection_path"]
                   )
         if args["get_coverage"]:
-            _ = es.calculate_enrichment_score(less100=args["less100"], greater25k=args["greater25k"])
-        _ = es.get_coverage()
+            _ = cgv.calculate_enrichment_score(less100=args["less100"], greater25k=args["greater25k"])
+        _ = cgv.get_coverage()
 
 
 if __name__ == "__main__":

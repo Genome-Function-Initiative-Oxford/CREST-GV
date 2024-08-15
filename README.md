@@ -1,13 +1,13 @@
-# ESVAR - Enrichment Score for genetic VARiants
+# CREST-GV - Cell types Ranking and Enrichment Score for selecTive Genetic Variants
 
-ESVAR is a method which allows querying [our described data collection](https://github.com/Genome-Function-Initiative-Oxford/ESVAR/blob/main/our_collection/data_collection.txt) of ~490 cell types (we keep piling more data to add to the data collection) to determine the enrichment score of a set of genetic variants. ESVAR rely on peak properties for each cell type in the data collection leveraging [LanceOtron](https://github.com/LHentges/LanceOtron) peak caller.
-ESVAR can also query your personal (in-house) data where formatted correctly (see [In-house data format](#In-house-data-format) section for a properly formatted data structure), in this case, the user can rely on the peak caller of their own choice.
+CREST-GV is a method which allows querying [our described data collection](https://github.com/Genome-Function-Initiative-Oxford/CREST-GV/blob/main/our_collection/data_collection.txt) of ~490 cell types (we keep piling more data to add to the data collection) to determine the enrichment score of a set of genetic variants. CREST-GV rely on peak properties for each cell type in the data collection leveraging [LanceOtron](https://github.com/LHentges/LanceOtron) peak caller.
+CREST-GV can also query your personal (in-house) data where formatted correctly (see [In-house data format](#In-house-data-format) section for a properly formatted data structure), in this case, the user can rely on the peak caller of their own choice.
 The only mandatory input for the tool is the path of a genetic file, stored following the format shown in [Genetic variant file format](#genetic-variant-file-format) section.
 
 ***
 
 ## Getting started
-ESVAR can be uesed and run using the __esvar__ conda envrironment. Please follow the installation instruction detailed below.
+CREST-GV can be uesed and run using the __crestgv__ conda envrironment. Please follow the installation instruction detailed below.
 
 ### Installation instructions for conda environment
 
@@ -15,8 +15,8 @@ This section rely on the assumption that any distribution of ```Conda``` (e.g., 
 
 #### Clone the repository
 ```
-git clone git@github.com:Genome-Function-Initiative-Oxford/ESVAR.git
-cd ESVAR
+git clone git@github.com:Genome-Function-Initiative-Oxford/CREST-GV.git
+cd CREST-GV
 ```
 
  
@@ -26,68 +26,68 @@ Activate the conda 'base' environment (if not active):
 conda activate base
 ```
 
-There are two ways to create the conda env __esvar__ environment:
+There are two ways to create the conda env __crestgv__ environment:
 1) Using mamba (if ```Mamba``` is installed), and follow the on screen instructions:
 ```
-mamba env create --file=envs/esvar.yml
+mamba env create --file=envs/crestgv.yml
 ```
 2) Using conda, and follow the on screen instructions.
 ```
-conda env create --file=envs/esvar.yml
+conda env create --file=envs/crestgv.yml
 ```
 
 #### Activate the environment
-Now, the __esvar__ environment is created it needs to be activated: 
+Now, the __crestgv__ environment is created it needs to be activated: 
 ```
-conda activate esvar
+conda activate crestgv
 ```
-You can then use ESVAR using this environment, enjoy!
+You can then use CREST-GV using this environment, enjoy!
 
 ### Environment installation note
-ESVAR has been successfully tested for the following operating systems: Ubuntu, CentOS, macOS (Intel CPU), and Windows. Unfortunately, it is not possible to install on macOS with M CPUs at the moment. 
-For any error in the installation step, please open an [issue](https://github.com/Genome-Function-Initiative-Oxford/ESVAR/issues) so we can give a general solution for users.
+CREST-GV has been successfully tested for the following operating systems: Ubuntu, CentOS, macOS (Intel CPU), and Windows. Unfortunately, it is not possible to install on macOS with M CPUs at the moment. 
+For any error in the installation step, please open an [issue](https://github.com/Genome-Function-Initiative-Oxford/CREST-GV/issues) so we can give a general solution for users.
 
 ### Reproducibility :repeat:
 If required for publication, package versions within the environment can be exported as follows:
 ```
-conda activate esvar
-conda env export > esvar_environment_versions.yml
+conda activate crestgv
+conda env export > crestgv_environment_versions.yml
 ```
 
 ***
 
-## How to use ESVAR
+## How to use CREST-GV
 
-There are 2 ways to use ESVAR:
+There are 2 ways to use CREST-GV:
 
 #### 1) from a code editor (e.g., VS Code) or a web-based interactive computing (e.g., Jupyter Notebook):
 ```
 import pandas as pd
 import sys
-sys.path.append('esvar/')
-from esvar import esvar
+sys.path.append('crestgv/')
+from crestgv import crestgv
 
-genetic  = "genetics_test/Bcell_GO_0035456.tsv"
-es       = esvar(genetic=genetic, output="Test", collection_name="super_pbmc")
-df_esvar = es.calculate_enrichment_score(less100=False, greater25k=False)
-df_cover = es.get_coverage()
+genetic    = "genetics_test/Bcell_GO_0035456.tsv"
+es         = crestgv(genetic=genetic, output="Test", collection_name="super_pbmc")
+df_crestgv = es.calculate_enrichment_score(less100=False, greater25k=False)
+df_cover   = es.get_coverage()
 ```
 
 You can find some helpful parameter information using:
 ```
-es = esvar(genetic=genetic)
-help(es)
+cgv = crestgv(genetic=genetic)
+help(cgv)
 ```
 
-We created a Jupyter Notebook with a heatmap plot as ESVAR example run (see [heatmap_test.ipynb](https://github.com/Genome-Function-Initiative-Oxford/ESVAR/blob/main/heatmap_test.ipynb)).
+We created a Jupyter Notebook with a heatmap plot as CREST-GV example run (see [heatmap_test.ipynb](https://github.com/Genome-Function-Initiative-Oxford/CREST-GV/blob/main/heatmap_test.ipynb)).
 
 #### 2) from a terminal:
-- for a single data collection ```python esvar.py -g genetics_test/Bcell_GO_0035456.tsv -cn super_pbmc -o test_api/single_run```
-- for all data collection ```python esvar.py -g genetics_test/Bcell_GO_0035456.tsv -o test_api/all_run -ra True```
+- for a single data collection ```python crestgv.py -g genetics_test/Bcell_GO_0035456.tsv -cn super_pbmc -o test_api/single_run```
+- for all data collection ```python crestgv.py -g genetics_test/Bcell_GO_0035456.tsv -o test_api/all_run -ra True```
 
 Here some usage information
 ```
-usage: esvar.py \
+usage: crestgv.py \
 	-g/--genetic [Required. Path to genetic file.] : str \
 	-nof/--number_of_folds [Number of folds to create backgound using the 1000genomes.] : int \
 	-o/--output [Directory where to save the scores.]  : str \
@@ -96,17 +96,17 @@ usage: esvar.py \
 	-cn/--collection_name [Data collection name, available 'cad', 'calderon', 'catlas_fetal', 'catlas_adult', 'erythoid_d7_d10_d13_d17', 'h1_hescs', 'immune_cell', 'ludwig2019', 'mpal', 'pancreatic_pbmc', and 'super_pbmc'.] : str \
 	-incp/--in_house_collection_path [In house data collection path (<path-to-directory>/<collection-name>).] : str \
 	-l100/--less100 [Boolean variable to force the software to run also with less than 100 variants per file.] : bool \
-	-g25k/--greater25k [Boolean variable to check if you want to run ESVAR on more than 25k variants.] : bool \
+	-g25k/--greater25k [Boolean variable to check if you want to run CREST-GV on more than 25k variants.] : bool \
 	-gc/--get_coverage [Run only coverage calculation. Enrichment score will be ignored.] : bool \
-	-ra/--run_all [Run ESVAR for all data collection. If -cn or -incp are set, they will be ignored.] : bool
+	-ra/--run_all [Run CREST-GV for all data collection. If -cn or -incp are set, they will be ignored.] : bool
 
 ```
 
 ***
 
-### Output ESVAR result
+### Output CREST-GV result
 
-ESVAR will create the following tree-like format result (see [heatmap_test folder](https://github.com/Genome-Function-Initiative-Oxford/ESVAR/tree/main/heatmap_test) example).
+CREST-GV will create the following tree-like format result (see [heatmap_test folder](https://github.com/Genome-Function-Initiative-Oxford/CREST-GV/tree/main/heatmap_test) example).
 
 ```
 heatmap_test
@@ -148,7 +148,7 @@ heatmap_test
 │   ├── statistics_intermediate_round3.csv
 │   ├── statistics_intermediate_round4.csv
 │   └── statistics_intermediate_round5.csv
-└── statistics_ESVAR.csv
+└── statistics_CREST-GV.csv
 ```
 
 
@@ -156,7 +156,7 @@ heatmap_test
 
 ### Genetic variant file format
 
-Any genetic variant file provided to ESVAR has to be tab (\t) separated and must contain at least 3 columns:
+Any genetic variant file provided to CREST-GV has to be tab (\t) separated and must contain at least 3 columns:
 1) "CHR_ID" : chromosome in the follwoing format *chrV*
 2) "CHR_POS" : chromosome position
 3) "SNPS" : ID of the variant (e.g., rs#####, or chrV-pos-ref-alt)
@@ -173,7 +173,7 @@ chr10   840700  chr10-840700-A-C
 
 ### In-house data format
 
-All the data has to be stored in a folder called with your collection name __<collection-name>__, following the tree-like format example below (see [example_files/in-house-data folder](https://github.com/Genome-Function-Initiative-Oxford/ESVAR/tree/main/example_files/in-house-data) example), where *in-house-data* is the *collection name*.
+All the data has to be stored in a folder called with your collection name __<collection-name>__, following the tree-like format example below (see [example_files/in-house-data folder](https://github.com/Genome-Function-Initiative-Oxford/CREST-GV/tree/main/example_files/in-house-data) example), where *in-house-data* is the *collection name*.
 
 ```
 example_files/in-house-data/
@@ -191,10 +191,10 @@ example_files/in-house-data/
 ***
 
 ### Pipeline updates :construction:
-If any changes are made to ESVAR, it is possible to update the repository by entering the main folder and pulling the update using:
+If any changes are made to CREST-GV, it is possible to update the repository by entering the main folder and pulling the update using:
    ```
    # Enter the main folder
-   cd ESVAR
+   cd CREST-GV
 
    # Pull updates
    git pull           
@@ -203,7 +203,7 @@ Alternatively, remove the cloned repository and then re-clone the repository as 
 Warning: use rm carefully!
 
 ```
-rm -rf ESVAR
+rm -rf CREST-GV
 ``` 
 <hr>
 

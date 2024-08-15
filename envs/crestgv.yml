@@ -1,4 +1,4 @@
-name: esvar
+name: crestgv
 channels:
   - bioconda
   - numba
