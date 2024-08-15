@@ -1,8 +1,8 @@
 import sys, glob
 import pandas as pd
 
-sys.path.append('esvar/')
-from esvar import esvar
+sys.path.append('crestgv/')
+from crestgv import crestgv
 
 collections = [ 'cad', 
 				'calderon', 
@@ -17,9 +17,9 @@ collections = [ 'cad',
 				'super_pbmc'
 			   ]
 
-genetic = "/project/Wellcome_Discovery/sriva/Git/ESVAR/genetics_test/Bcell_GO_0035456.tsv"
+genetic = "/project/Wellcome_Discovery/sriva/Git/CREST-GV/genetics_test/Bcell_GO_0035456.tsv"
 
 for collection in collections:
-	es = esvar(genetic=genetic, output="test/%s"%collection, collection_name=collection)
-	_ = es.calculate_enrichment_score(less100=False)
-	_ = es.get_coverage()
+	cgv = crestgv(genetic=genetic, output="test/%s"%collection, collection_name=collection)
+	_ = cgv.calculate_enrichment_score(less100=False)
+	_ = cgv.get_coverage()

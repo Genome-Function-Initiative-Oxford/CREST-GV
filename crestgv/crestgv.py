@@ -12,7 +12,7 @@ from scipy import stats
 from tqdm import tqdm
 
 
-class esvar():
+class crestgv():
 	
 	def __init__(self, genetic=None, number_of_folds=5, output="output", genome="hg38", seed=42, collection_name="", in_house_collection_path=""):
 
@@ -62,15 +62,15 @@ class esvar():
 
 		if self.genome == "hg38":
 			self.mappable_bp = 3049315783 #https://genomewiki.ucsc.edu/index.php?title=Hg38_27-way_Genome_size_statistics
-			self.background = "https://datashare.molbiol.ox.ac.uk/public/project/Wellcome_Discovery/ESVAR_collection/1000genomes/ALL_1000_genomes.variants.hg38.bed"
+			self.background = "https://datashare.molbiol.ox.ac.uk/public/project/Wellcome_Discovery/CREST-GV_collection/1000genomes/ALL_1000_genomes.variants.hg38.bed"
 		elif self.genome == "hg19":
 		# 	self.mappable_bp = 2897310462 #https://genomewiki.ucsc.edu/index.php?title=Hg19_100way_Genome_size_statistics
-		# 	self.background = "https://datashare.molbiol.ox.ac.uk/public/project/Wellcome_Discovery/ESVAR_collection/1000genomes/ALL_1000_genomes.variants.hg19.bed"
+		# 	self.background = "https://datashare.molbiol.ox.ac.uk/public/project/Wellcome_Discovery/CREST-GV_collection/1000genomes/ALL_1000_genomes.variants.hg19.bed"
 			sys.exit("Genome 'hg19' not functional at the moment. Please use genome 'hg38'.")
 		else:
 			sys.exit("Select genome between 'hg19' and 'hg38'.")
 		
-		self.URL = "https://datashare.molbiol.ox.ac.uk/public/project/Wellcome_Discovery/ESVAR_collection"
+		self.URL = "https://datashare.molbiol.ox.ac.uk/public/project/Wellcome_Discovery/CREST-GV_collection"
 
 		self.collection_name_dict = {'cad'                     : 'CAD',
 									 'calderon'                : 'calderon',
@@ -169,7 +169,7 @@ class esvar():
 			less100 : Boolean
 				Boolean variable to force the software to run also with less than 100 variants per file.
 			greater25k : Boolean
-				Boolean variable to check if you want to run ESVAR on more than 25k variants.
+				Boolean variable to check if you want to run CREST-GV on more than 25k variants.
 
 			Returns
 			-------
@@ -192,12 +192,12 @@ class esvar():
 		df_genetics = df_genetics.drop_duplicates()
 
 		if (df_genetics.shape[0]>25000) & (not greater25k):
-			sys.exit("Genetics provided after quality control contains more than 25k entry variants.\nIf you want to carry on anyway with it, please set 'greater25k=True'.\nIf this is the case, it might take hours if not days to compute the ESVAR scores!")
+			sys.exit("Genetics provided after quality control contains more than 25k entry variants.\nIf you want to carry on anyway with it, please set 'greater25k=True'.\nIf this is the case, it might take hours if not days to compute the CREST-GV scores!")
 		
 		if (df_genetics.shape[0]<100) & (not less100):
 			sys.exit("Genetics provided after quality control contains less than the minimum number (100 variants) of entries.\nIf you want to carry on anyway with it, please set 'less100=True'.")
 
-		print("Total number of used variants in ESVAR: %s"%df_genetics.shape[0])
+		print("Total number of used variants in CREST-GV: %s"%df_genetics.shape[0])
 		self.genetic_df = df_genetics
 		return df_genetics
 
@@ -460,7 +460,7 @@ class esvar():
 			df_data["P_ss%s"%f]  = stats.binom.pmf(df_data["bg_%s"%f], number_of_genetic, df_data["p_succes"])
 			df_data["FOLD%s"%f] = -np.log10(df_data["P_gwas"])/-np.log10(df_data["P_ss%s"%f])
 		col = df_data.loc[: , "FOLD1":"FOLD%s"%f]
-		df_data['ESVAR'] = col.mean(axis=1)
+		df_data['CREST-GV'] = col.mean(axis=1)
 
 		return df_data
 
@@ -536,7 +536,7 @@ class esvar():
 			less100 : Boolean
 				Boolean variable to force the software to run also with less than 100 variants per file.
 			greater25k : Boolean
-				Boolean variable to check if you want to run ESVAR on more than 25k variants.
+				Boolean variable to check if you want to run CREST-GV on more than 25k variants.
 
 			Returns
 			-------
@@ -582,12 +582,12 @@ class esvar():
 		# _ = [pool.apply_async(self._parallel_ces, args=(idx, df_collection, number_of_genetic, beds)) for idx, df_collection, number_of_genetic in zip(idx_list, df_collection_list, number_of_genetic_list)]
 		pool.close()
 
-		dfs_collection = [pd.read_csv(df_path, sep="\t", index_col=0)[['ESVAR']] for df_path in glob.glob(self.output+os.sep+"rounds"+os.sep+"*.csv")]
+		dfs_collection = [pd.read_csv(df_path, sep="\t", index_col=0)[['CREST-GV']] for df_path in glob.glob(self.output+os.sep+"rounds"+os.sep+"*.csv")]
 		dfs_collection = pd.concat(dfs_collection, axis=1)
-		dfs_collection['ESVAR_all'] = dfs_collection.mean(axis=1)
-		dfs_collection = dfs_collection[['ESVAR_all']]
+		dfs_collection['CREST-GV_all'] = dfs_collection.mean(axis=1)
+		dfs_collection = dfs_collection[['CREST-GV_all']]
 
-		dfs_collection.to_csv(self.output+os.sep+"statistics_ESVAR.csv", sep="\t")
+		dfs_collection.to_csv(self.output+os.sep+"statistics_CREST-GV.csv", sep="\t")
 
 		self.__clean_tmp()
 		print("Processing genetics finished.")
