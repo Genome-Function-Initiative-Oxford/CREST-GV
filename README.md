@@ -1,6 +1,6 @@
 # CREST-GV - Cell types Ranking and Enrichment Score for selecTive Genetic Variants
 
-CREST-GV is a method which allows querying [our described data collection](https://github.com/Genome-Function-Initiative-Oxford/CREST-GV/blob/main/our_collection/data_collection.txt) of ~490 cell types (we keep piling more data to add to the data collection) to determine the enrichment score of a set of genetic variants. CREST-GV rely on peak properties for each cell type in the data collection leveraging [LanceOtron](https://github.com/LHentges/LanceOtron) peak caller.
+CREST-GV is a method which allows querying [our described data collection](https://github.com/Genome-Function-Initiative-Oxford/CREST-GV/blob/main/our_collection/data_collection.txt) of ~500 cell types (we keep piling more data to add to the data collection) to determine the enrichment score of a set of genetic variants. CREST-GV rely on peak properties for each cell type in the data collection leveraging [LanceOtron](https://github.com/LHentges/LanceOtron) peak caller.
 CREST-GV can also query your personal (in-house) data where formatted correctly (see [In-house data format](#In-house-data-format) section for a properly formatted data structure), in this case, the user can rely on the peak caller of their own choice.
 The only mandatory input for the tool is the path of a genetic file, stored following the format shown in [Genetic variant file format](#genetic-variant-file-format) section.
 

@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 class crestgv():
 	
-	def __init__(self, genetic=None, number_of_folds=5, output="output", genome="hg38", seed=42, collection_name="", in_house_collection_path=""):
+	def __init__(self, genetic=None, number_of_folds=5, output="output", genome="hg38", min_number_genetics=100, seed=42, collection_name="", in_house_collection_path=""):
 
 		"""\
 			__init__.
@@ -29,6 +29,8 @@ class crestgv():
 				Directory where to save the scores.
 			genome : str
 				Genome to use, available 'hg19' and 'hg38'.
+			min_number_genetics : int
+				Subset number for genetic to query. Values allow in range(100, 1000).
 			seed : int
 				Seed for reproducibility, shuffle 1000genomes excluded.
 			collection_name : str
@@ -59,6 +61,10 @@ class crestgv():
 		
 		self.number_of_folds = number_of_folds
 		self.genome = genome
+		if 100 <= min_number_genetics <= 1000:
+			self.min_number_genetics = int(min_number_genetics)
+		else:
+			sys.exit("'min_number_genetics' has to be between 100 and 1000.")
 
 		if self.genome == "hg38":
 			self.mappable_bp = 3049315783 #https://genomewiki.ucsc.edu/index.php?title=Hg38_27-way_Genome_size_statistics
@@ -80,7 +86,7 @@ class crestgv():
 									 'h1_hescs'                : 'H1_hESCs',
 									 'immune_cell'             : 'immune_cell',
 									 'ludwig2019'              : 'ludwig2019',
-									 'mpal'                    : 'MPAL_lowGr',
+									 'mpal'                    : 'MPAL',
 									 'pancreatic_pbmc'         : 'pancreatic_pbmc',
 									 'super_pbmc'              : 'super_PBMC'
 									 }
@@ -159,14 +165,14 @@ class crestgv():
 		return df_genetics
 
 
-	def __load_genetic(self, less100=False, greater25k=False):
+	def __load_genetic(self, lessNG=False, greater25k=False):
 
 		"""\
 			Load genetic.
 
 			Parameters
 			----------
-			less100 : Boolean
+			lessNG : Boolean
 				Boolean variable to force the software to run also with less than 100 variants per file.
 			greater25k : Boolean
 				Boolean variable to check if you want to run CREST-GV on more than 25k variants.
@@ -194,8 +200,8 @@ class crestgv():
 		if (df_genetics.shape[0]>25000) & (not greater25k):
 			sys.exit("Genetics provided after quality control contains more than 25k entry variants.\nIf you want to carry on anyway with it, please set 'greater25k=True'.\nIf this is the case, it might take hours if not days to compute the CREST-GV scores!")
 		
-		if (df_genetics.shape[0]<100) & (not less100):
-			sys.exit("Genetics provided after quality control contains less than the minimum number (100 variants) of entries.\nIf you want to carry on anyway with it, please set 'less100=True'.")
+		if (df_genetics.shape[0]<self.min_number_genetics) & (not lessNG):
+			sys.exit("Genetics provided after quality control contains less than the minimum number 'min_number_genetics' of entries.\nIf you want to carry on anyway with it, please set 'lessNG=True'.")
 
 		print("Total number of used variants in CREST-GV: %s"%df_genetics.shape[0])
 		self.genetic_df = df_genetics
@@ -526,14 +532,14 @@ class crestgv():
 		return df_collection
 
 
-	def calculate_enrichment_score(self, less100=False, greater25k=False):
+	def calculate_enrichment_score(self, lessNG=False, greater25k=False):
 
 		"""\
 			Calculate enrichment score for provided genetics per selected data collection.
 
 			Parameters
 			----------
-			less100 : Boolean
+			lessNG : Boolean
 				Boolean variable to force the software to run also with less than 100 variants per file.
 			greater25k : Boolean
 				Boolean variable to check if you want to run CREST-GV on more than 25k variants.
@@ -547,13 +553,13 @@ class crestgv():
 		if self.genetic_file is None:
 			sys.exit("Error, missing genetic file.")
 		
-		df_genetics = self.__load_genetic(less100=less100, greater25k=greater25k)
+		df_genetics = self.__load_genetic(lessNG=lessNG, greater25k=greater25k)
 
-		if (less100) & (df_genetics.shape[0]<100):
+		if (lessNG) & (df_genetics.shape[0]<self.min_number_genetics):
 			df_genetics_list = [df_genetics]
 		else:
 			df_genetics_list = []
-			sub_n = 100
+			sub_n = self.min_number_genetics
 			df_genetics_init = df_genetics.sample(sub_n, random_state=self.seed)
 			df_genetics_list.append(df_genetics_init)
 			for i in range(int(df_genetics.shape[0]/sub_n)-1):
@@ -606,7 +612,7 @@ class crestgv():
 				Final enrichment score DataFrame for provided genetics and selected data collection.
 		"""
 
-		self.genetic_df = self.__load_genetic(less100=True, greater25k=True)
+		self.genetic_df = self.__load_genetic(lessNG=True, greater25k=True)
 		self.genetic_df['CHR_POS+1'] = self.genetic_df['CHR_POS']+1
 
 		info, bigwigs, _ = self.__loading_collection_data()

@@ -4,7 +4,7 @@ warnings.filterwarnings('ignore')
 import sys, os, argparse
 import pandas as pd
 
-sys.path.append('esvar/')
+sys.path.append('crestgv/')
 from crestgv import crestgv
 from _version import __version__
 
@@ -16,7 +16,7 @@ collection_name_dict = {'cad'                     : 'CAD',
                         'h1_hescs'                : 'H1_hESCs',
                         'immune_cell'             : 'immune_cell',
                         'ludwig2019'              : 'ludwig2019',
-                        'mpal'                    : 'MPAL_lowGr',
+                        'mpal'                    : 'MPAL',
                         'pancreatic_pbmc'         : 'pancreatic_pbmc',
                         'super_pbmc'              : 'super_PBMC'
                        }
@@ -32,7 +32,8 @@ def getArgs():
     # Optional settings
     parser.add_argument("-nof",  "--number_of_folds", help="Number of folds to create backgound using the 1000genomes.", nargs="?", default=5, type=int)
     parser.add_argument("-o",    "--output",          help="Directory where to save the scores.", nargs="?", default="output", type=str)
-    parser.add_argument("-gb",   "--genome",          help="Genome to use, available 'hg19' and 'hg38'.", nargs="?", default="hg38", type=str)
+    parser.add_argument("-gb",   "--genome",          help="Genome to use, available 'hg19' and 'hg38'.", nargs="?", default="hg38", type=str)    
+    parser.add_argument("-ng",   "--min_number_genetics",          help="Subset number for genetic to query. Values allow in range(100, 1000).", nargs="?", default=100, type=int)
     parser.add_argument("-s",    "--seed",            help="Seed for reproducibility, shuffle 1000genomes excluded.", nargs="?", default=42, type=int)
 
     # Optional settings (choose one or the other)
@@ -40,7 +41,7 @@ def getArgs():
     parser.add_argument("-incp", "--in_house_collection_path", help="In house data collection path (<path-to-directory>/<collection-name>).", nargs="?", default="", type=str)
 
     # Optional settings when list of variants is less than 100
-    parser.add_argument("-l100", "--less100", help="Boolean variable to force the software to run also with less than 100 variants per file.", nargs="?", default=False, type=bool)
+    parser.add_argument("-lng", "--lessNG", help="Boolean variable to force the software to run also with less than 100 variants per file.", nargs="?", default=False, type=bool)
 
     # Optional settings when list of variants is greater than 25,000
     parser.add_argument("-g25k", "--greater25k", help="Boolean variable to check if you want to run CREST-GV on more than 25k variants.", nargs="?", default=False, type=bool)
@@ -62,27 +63,29 @@ def main():
     if args["run_all"]:
         for collection_i in list(collection_name_dict.keys()):
             cgv = crestgv(genetic=args["genetic"], 
-                         number_of_folds=args["number_of_folds"], 
-                         output=args["output"]+os.sep+collection_i, 
-                         genome=args["genome"], 
-                         seed=args["seed"], 
-                         collection_name=args["collection_name"],
-                         in_house_collection_path=args["in_house_collection_path"]
+                          number_of_folds=args["number_of_folds"], 
+                          output=args["output"]+os.sep+collection_i, 
+                          genome=args["genome"], 
+                          min_number_genetics=args["min_number_genetics"],
+                          seed=args["seed"], 
+                          collection_name=collection_i,
+                          in_house_collection_path=args["in_house_collection_path"]
                         )
             if args["get_coverage"]:
-                _ = cgv.calculate_enrichment_score(less100=args["less100"], greater25k=args["greater25k"])
+                _ = cgv.calculate_enrichment_score(lessNG=args["lessNG"], greater25k=args["greater25k"])
             _ = cgv.get_coverage()
     else:
         cgv = crestgv(genetic=args["genetic"], 
-                   number_of_folds=args["number_of_folds"], 
-                   output=args["output"], 
-                   genome=args["genome"], 
-                   seed=args["seed"], 
-                   collection_name=args["collection_name"],
-                   in_house_collection_path=args["in_house_collection_path"]
+                      number_of_folds=args["number_of_folds"], 
+                      output=args["output"], 
+                      genome=args["genome"], 
+                      min_number_genetics=args["min_number_genetics"],
+                      seed=args["seed"], 
+                      collection_name=args["collection_name"],
+                      in_house_collection_path=args["in_house_collection_path"]
                   )
         if args["get_coverage"]:
-            _ = cgv.calculate_enrichment_score(less100=args["less100"], greater25k=args["greater25k"])
+            _ = cgv.calculate_enrichment_score(lessNG=args["lessNG"], greater25k=args["greater25k"])
         _ = cgv.get_coverage()
 
 
