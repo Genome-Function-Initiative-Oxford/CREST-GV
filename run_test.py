@@ -21,5 +21,5 @@ genetic = "/project/Wellcome_Discovery/sriva/Git/CREST-GV/genetics_test/Bcell_GO
 
 for collection in collections:
 	cgv = crestgv(genetic=genetic, output="test/%s"%collection, collection_name=collection)
-	_ = cgv.calculate_enrichment_score(less100=False)
+	_ = cgv.calculate_enrichment_score(lessNG=False)
 	_ = cgv.get_coverage()

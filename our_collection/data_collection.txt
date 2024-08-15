@@ -464,16 +464,29 @@ ludwig2019
  - Reticulocyte
 
 mpal
- - BMMC_D5T1
- - BMMC_D6T1
- - CD34_D7T1
- - CD34_D8T1
- - CD34_D9T1
- - PBMC_D10T1
- - PBMC_D11T1
- - PBMC_D12T1
- - PBMC_D12T2
- - PBMC_D12T3
+ - 01_HSC
+ - 02_Early_Eryth
+ - 03_Late_Eryth
+ - 04_Early_Baso
+ - 05_CMP_LMPP
+ - 06_CLP_1
+ - 07_GMP
+ - 08_GMP_Neut
+ - 09_pDC
+ - 10_cDC
+ - 11_CD14_Mono_1
+ - 12_CD14_Mono_2
+ - 15_CLP_2
+ - 16_Pre_B
+ - 17_B
+ - 18_Plasma
+ - 19_CD8_N
+ - 20_CD4_N1
+ - 21_CD4_N2
+ - 22_CD4_M
+ - 23_CD8_EM
+ - 24_CD8_CM
+ - 25_NK
 
 pancreatic-pbmc
  - pancreas_nPOD-6007
