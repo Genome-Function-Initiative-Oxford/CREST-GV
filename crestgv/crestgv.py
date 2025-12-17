@@ -1,6 +1,7 @@
 import warnings
 warnings.filterwarnings('ignore')
-import glob, pybedtools, sys, os, subprocess, shutil, pyBigWig, re, random
+import glob, sys, os, subprocess, shutil, pyBigWig, re, random
+# import pybedtools
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import multiprocessing as mp
@@ -8,13 +9,14 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 import multiprocessing as mp
+import pyranges as pr
 from scipy import stats
 from tqdm import tqdm
 
 
 class crestgv():
 	
-	def __init__(self, genetic=None, number_of_folds=5, output="output", genome="hg38", min_number_genetics=100, seed=42, collection_name="", in_house_collection_path=""):
+	def __init__(self, genetic=None, output="output", genome="hg38", min_number_genetics=500, seed=42, collection_name="", in_house_collection_path=""):
 
 		"""\
 			__init__.
@@ -29,12 +31,10 @@ class crestgv():
 				Directory where to save the scores.
 			genome : str
 				Genome to use, available 'hg19' and 'hg38'.
-			min_number_genetics : int
-				Subset number for genetic to query. Values allow in range(100, 1000).
 			seed : int
 				Seed for reproducibility, shuffle 1000genomes excluded.
 			collection_name : str
-				Data collection name, available 'cad', 'calderon', 'catlas_fetal', 'catlas_adult', 'erythoid_d7_d10_d13_d17', 'h1_hescs', 'immune_cell', 'ludwig2019', 'mpal', 'pancreatic_pbmc', and 'super_pbmc'.
+				Data collection name, available 'cad', 'calderon', 'catlas_fetal', 'catlas_adult', 'erythoid_d7_d10_d13_d17', 'greenleaf_brain', 'h1_hescs', 'immune_cell', 'ludwig2019', 'mpal', 'pancreatic_pbmc', and 'super_pbmc'.
 			in_house_collection_path : str
 				In house data collection path (<path-to-directory>/<collection-name>) The directory has to be structured as: └── <path-to-directory>/<collection-name>
 																																├── bigwigs/cell-type-name*.bw
@@ -54,35 +54,30 @@ class crestgv():
 			sys.exit("Provide correct path to genetic file.")
 
 		self.genetic_df = pd.DataFrame()
+		self.min_number_genetics = min_number_genetics
 
 		self.output = output
 		self.tmp = self.output+'/tmp'
-		self.folds = self.output+'/folds'
 		
-		self.number_of_folds = number_of_folds
 		self.genome = genome
-		if 100 <= min_number_genetics <= 1000:
-			self.min_number_genetics = int(min_number_genetics)
-		else:
-			sys.exit("'min_number_genetics' has to be between 100 and 1000.")
 
 		if self.genome == "hg38":
 			self.mappable_bp = 3049315783 #https://genomewiki.ucsc.edu/index.php?title=Hg38_27-way_Genome_size_statistics
-			self.background = "https://datashare.molbiol.ox.ac.uk/public/project/Wellcome_Discovery/CREST-GV_collection/1000genomes/ALL_1000_genomes.variants.hg38.bed"
 		elif self.genome == "hg19":
 		# 	self.mappable_bp = 2897310462 #https://genomewiki.ucsc.edu/index.php?title=Hg19_100way_Genome_size_statistics
-		# 	self.background = "https://datashare.molbiol.ox.ac.uk/public/project/Wellcome_Discovery/CREST-GV_collection/1000genomes/ALL_1000_genomes.variants.hg19.bed"
 			sys.exit("Genome 'hg19' not functional at the moment. Please use genome 'hg38'.")
 		else:
 			sys.exit("Select genome between 'hg19' and 'hg38'.")
 		
-		self.URL = "https://datashare.molbiol.ox.ac.uk/public/project/Wellcome_Discovery/CREST-GV_collection"
+# 		self.URL = "https://datashare.molbiol.ox.ac.uk/public/project/Wellcome_Discovery/CREST-GV_collection"
+		self.URL = "/project/Wellcome_Discovery/datashare/CREST-GV_collection"
 
 		self.collection_name_dict = {'cad'                     : 'CAD',
 									 'calderon'                : 'calderon',
 									 'catlas_fetal'            : 'catlas_fetal',
 									 'catlas_adult'            : 'catlas_adult',
 									 'erythoid_d7_d10_d13_d17' : 'Days7_10_13_17',
+									 'greenleaf_brain'         : 'greenleaf_brain',
 									 'h1_hescs'                : 'H1_hESCs',
 									 'immune_cell'             : 'immune_cell',
 									 'ludwig2019'              : 'ludwig2019',
@@ -105,67 +100,158 @@ class crestgv():
 			self.collection_name = in_house_collection_path.split("/")[-1]
 			self.collectionHouseBool = True
 
+		# Read in chunks
+		if self.collectionHouseBool:
+			print("Loading 1000genome snps...")
+			chunk_size = 100000  # Adjust based on your memory
+			chunks = []
+
+			for chunk in pd.read_csv(self.URL+os.sep+"1000genomes/ALL_1000_genomes.variants.hg38.bed", sep='\t',
+									 chunksize=chunk_size, 
+									 low_memory=False,  # Handle mixed data types,
+									 header=None,
+									 dtype={
+										 'Chromosome': 'category',  # Use category for low memory
+										 'Start': 'int32',    # Reduce precision
+										 'End': 'int32',    # Reduce precision
+										 'ID': 'category',    # Reduce precision
+									 }):
+				chunks.append(chunk[[0,1,2]])
+
+			# Concatenate chunks
+			snp_data = pd.concat(chunks, ignore_index=True)
+			snp_data.columns = ["Chromosome", "Start", "End"]
+			self.n_snp_data = snp_data.shape[0]
+			self.snps = pr.PyRanges(snp_data)
+
+
+# 	def __check_genetic_format(self, df_genetics):
+
+# 		"""\
+# 			Check genetic format.
+
+# 			Parameters
+# 			----------
+# 			df_genetics : pandas.DataFrame
+# 				DataFrame of initial genetics.
+
+# 			Returns
+# 			-------
+# 			df_genetics : pandas.DataFrame
+# 				DataFrame of filtered genetics.
+# 		"""
+
+# 		if not os.path.exists(self.genetic_file):
+# 			sys.exit("Error, gentic file does not exist.")
+
+# 		print("Removing NaN rows from loaded file ...")
+# 		try:
+# 			df_genetics = df_genetics[["CHR_ID", "CHR_POS", "SNPS"]]
+# 		except:
+# 			sys.exit("Error, gentic file must contain at least 3 columns:  \
+# 						collection_name_dict\t'CHR_ID': int or fload value, \
+# 						collection_name_dict\t'CHR_POS': int or fload value, \
+# 						collection_name_dict\t'SNPS': string value.")
+
+# 		df_genetics['CHR_POS'] = df_genetics['CHR_POS'].astype(str)
+# 		df_genetics = df_genetics[~df_genetics['CHR_POS'].str.contains(";")] # check when happens
+# 		df_genetics = df_genetics[~df_genetics['CHR_POS'].str.contains("x")] # check when happens
+		
+# 		df_genetics = df_genetics[np.isfinite(df_genetics['CHR_POS'])]
+		
+# 		df_genetics['CHR_POS'] = df_genetics['CHR_POS'].astype(float).astype(int)
+# 		df_genetics = df_genetics.dropna()
+
+# 		if df_genetics.shape[-1] == 1:
+# 			sys.exit("Error, gentic file must be tab delimited.")
+		
+# 		if df_genetics.shape[-1] < 3:
+# 			sys.exit("Error, gentic file must contain at least 3 columns:  \
+# 					collection_name_dict\t'CHR_ID': int or fload value, \
+# 					collection_name_dict\t'CHR_POS': int or fload value, \
+# 					collection_name_dict\t'SNPS': string value.")
+
+# 		if df_genetics.shape[-1] >= 3:
+# 			if ("CHR_ID" not in df_genetics.columns) | ("CHR_POS" not in df_genetics.columns) | ("SNPS" not in df_genetics.columns):
+# 				sys.exit("Error, gentic file must contain at least 3 columns:  \
+# 						collection_name_dict\t'CHR_ID': int or fload value, \
+# 						collection_name_dict\t'CHR_POS': int or fload value, \
+# 						collection_name_dict\t'SNPS': string value.")
+
+# 		df_genetics['CHR_POS'] = df_genetics['CHR_POS'].astype(int)
+# 		if df_genetics.dtypes["CHR_POS"] not in ['int32', 'int64', 'float32', 'float64']:
+# 			sys.exit("Error, column 'CHR_POS' does not contain all numeric values.")
+# 		if df_genetics.dtypes["SNPS"] not in ['str', 'object']:
+# 			sys.exit("Error, column 'SNPS' does not contain all string/object values.")  
+		
+# 		return df_genetics
 
 	def __check_genetic_format(self, df_genetics):
+		"""
+		Check genetic format.
 
-		"""\
-			Check genetic format.
+		Parameters
+		----------
+		df_genetics : pandas.DataFrame
+			DataFrame of initial genetics.
 
-			Parameters
-			----------
-			df_genetics : pandas.DataFrame
-				DataFrame of initial genetics.
-
-			Returns
-			-------
-			df_genetics : pandas.DataFrame
-				DataFrame of filtered genetics.
+		Returns
+		-------
+		df_genetics : pandas.DataFrame
+			DataFrame of filtered genetics.
 		"""
 
 		if not os.path.exists(self.genetic_file):
-			sys.exit("Error, gentic file does not exist.")
+			sys.exit("Error, genetic file does not exist.")
 
-		print("Removing NaN rows from loaded file ...")
+		print("Checking and cleaning genetic file...")
+
+		# Ensure required columns exist
+		required_columns = ["CHR_ID", "CHR_POS", "SNPS"]
 		try:
-			df_genetics = df_genetics[["CHR_ID", "CHR_POS", "SNPS"]]
-		except:
-			sys.exit("Error, gentic file must contain at least 3 columns:  \
-						collection_name_dict\t'CHR_ID': int or fload value, \
-						collection_name_dict\t'CHR_POS': int or fload value, \
-						collection_name_dict\t'SNPS': string value.")
+			df_genetics = df_genetics[required_columns]
+		except KeyError as e:
+			sys.exit(f"Error: Missing required column {e}. Genetic file must contain: " + 
+					 "'CHR_ID' (int/float), 'CHR_POS' (int/float), 'SNPS' (string).")
 
+		# Convert CHR_POS to string first to handle potential problematic entries
 		df_genetics['CHR_POS'] = df_genetics['CHR_POS'].astype(str)
-		df_genetics = df_genetics[~df_genetics['CHR_POS'].str.contains(";")] # check when happens
-		df_genetics = df_genetics[~df_genetics['CHR_POS'].str.contains("x")] # check when happens
+                
+		# Remove rows with problematic entries
+		df_genetics = df_genetics[
+			~df_genetics['CHR_POS'].str.contains(';') &  # Remove entries with semicolons
+			~df_genetics['CHR_POS'].str.contains('x', case=False)  # Remove entries with 'x'
+		]
+        
+		# Convert CHR_POS to numeric, coercing errors to NaN
+		df_genetics['CHR_POS'] = pd.to_numeric(df_genetics['CHR_POS'], errors='coerce')
+                
+		# Remove NaN values
+		df_genetics = df_genetics.dropna(subset=['CHR_POS', 'CHR_ID', 'SNPS'])
+                
+		# Convert CHR_POS to integer
 		df_genetics['CHR_POS'] = df_genetics['CHR_POS'].astype(int)
-		df_genetics = df_genetics.dropna()
+                
+# 		# Additional type checking
+# 		try:
+# 			# Ensure CHR_ID is numeric
+# 			df_genetics['CHR_ID'] = pd.to_numeric(df_genetics['CHR_ID'], errors='raise')
 
-		if df_genetics.shape[-1] == 1:
-			sys.exit("Error, gentic file must be tab delimited.")
-		
-		if df_genetics.shape[-1] < 3:
-			sys.exit("Error, gentic file must contain at least 3 columns:  \
-					collection_name_dict\t'CHR_ID': int or fload value, \
-					collection_name_dict\t'CHR_POS': int or fload value, \
-					collection_name_dict\t'SNPS': string value.")
+# 			# Ensure SNPS is string
+# 			df_genetics['SNPS'] = df_genetics['SNPS'].astype(str)
+# 		except ValueError as e:
+# 			sys.exit(f"Error in data type conversion: {e}")
 
-		if df_genetics.shape[-1] >= 3:
-			if ("CHR_ID" not in df_genetics.columns) | ("CHR_POS" not in df_genetics.columns) | ("SNPS" not in df_genetics.columns):
-				sys.exit("Error, gentic file must contain at least 3 columns:  \
-						collection_name_dict\t'CHR_ID': int or fload value, \
-						collection_name_dict\t'CHR_POS': int or fload value, \
-						collection_name_dict\t'SNPS': string value.")
+		# Final validation
+		if df_genetics.empty:
+			sys.exit("Error: No valid data remains after filtering.")
 
-		df_genetics['CHR_POS'] = df_genetics['CHR_POS'].astype(int)
-		if df_genetics.dtypes["CHR_POS"] not in ['int32', 'int64', 'float32', 'float64']:
-			sys.exit("Error, column 'CHR_POS' does not contain all numeric values.")
-		if df_genetics.dtypes["SNPS"] not in ['str', 'object']:
-			sys.exit("Error, column 'SNPS' does not contain all string/object values.")
+		print(f"Processed genetic file. Retained {len(df_genetics)} rows.")
 
 		return df_genetics
 
 
-	def __load_genetic(self, lessNG=False, greater25k=False):
+	def __load_genetic(self):
 
 		"""\
 			Load genetic.
@@ -183,7 +269,7 @@ class crestgv():
 				DataFrame of filtered genetics.
 		"""
 
-		df_genetics = pd.read_csv(self.genetic_file, sep="\t")
+		df_genetics = pd.read_csv(self.genetic_file, sep="\t", names=['SNPS', 'CHR_ID','CHR_POS'])#,'CHR_POS+1','SNPSa','R','A','X','Y','Z'])
 		df_genetics = self.__check_genetic_format(df_genetics)
 		df_genetics = df_genetics.dropna(subset=['CHR_ID'], axis=0)
 		df_genetics["CHR_ID"] = df_genetics["CHR_ID"].astype(str)
@@ -197,13 +283,9 @@ class crestgv():
 		df_genetics = df_genetics[['CHR_ID', 'CHR_POS', 'CHR_POS+1', 'SNPS']]
 		df_genetics = df_genetics.drop_duplicates()
 
-		if (df_genetics.shape[0]>25000) & (not greater25k):
-			sys.exit("Genetics provided after quality control contains more than 25k entry variants.\nIf you want to carry on anyway with it, please set 'greater25k=True'.\nIf this is the case, it might take hours if not days to compute the CREST-GV scores!")
-		
-		if (df_genetics.shape[0]<self.min_number_genetics) & (not lessNG):
-			sys.exit("Genetics provided after quality control contains less than the minimum number 'min_number_genetics' of entries.\nIf you want to carry on anyway with it, please set 'lessNG=True'.")
-
 		print("Total number of used variants in CREST-GV: %s"%df_genetics.shape[0])
+		if df_genetics.shape[0]<self.min_number_genetics:
+			sys.exit("Genetics provided after quality control contains less than %s entry variants.") 
 		self.genetic_df = df_genetics
 		return df_genetics
 
@@ -295,148 +377,77 @@ class crestgv():
 		"""
 		
 		df_data = pd.DataFrame()
-		peak_area, ps, celltypes = [], [], []
-		print("Calculating (1) total number of base-pairs within peaks and (2) total number of base-pairs within peaks divided by uniquely mappable base-pairs ...")
-		for bed in tqdm(beds):
-			tmp = pd.read_csv(bed, sep="\t", names=["chrom", "start", "end"])
-			celltype = bed.split("/")[-1].replace("_L-tron.bed","")
-			celltypes.append(celltype)
-			# total number of base-pairs within peaks
-			tot_bp_within_peaks = np.sum(tmp['end']-tmp['start'])
-			peak_area.append(tot_bp_within_peaks)
-			# total number of base-pairs within peaks divided by uniquely mappable base-pairs
-			p = tot_bp_within_peaks/self.mappable_bp
-			ps.append(p)
+# 		peak_area, ps, celltypes = [], [], []
+# 		print("Calculating (1) total number of base-pairs within peaks and (2) total number of base-pairs within peaks divided by uniquely mappable base-pairs ...")
+# 		for bed in tqdm(beds):
+# 			tmp = pd.read_csv(bed, sep="\t", names=["chrom", "start", "end"])
+# 			celltype = bed.split("/")[-1].replace("_L-tron.bed","")
+# 			celltypes.append(celltype)
+# 			# total number of base-pairs within peaks
+# 			tot_bp_within_peaks = np.sum(tmp['end']-tmp['start'])
+# 			peak_area.append(tot_bp_within_peaks)
+# 			# total number of base-pairs within peaks divided by uniquely mappable base-pairs
+# 			p = tot_bp_within_peaks/self.mappable_bp
+# 			ps.append(p)
 
-		df_data["Peak_area"] = peak_area
-		df_data["p_succes"]  = ps
-		df_data.index		 = celltypes
+# 		df_data["Peak_area"] = peak_area
+# 		df_data["p_succes"]  = ps
+# 		df_data.index		 = celltypes
 
-		if not os.path.exists(self.tmp):
-			os.makedirs(self.tmp)
-		pybedtools.set_tempdir(self.tmp)
+### new only for new collections
+		if self.collectionHouseBool:
+			peak_area, ps, celltypes = [], [], []
+			print("Calculating (1) total number of snps from 1000genomes within peaks ...")
+			for bed in tqdm(beds):
+				region_data = pd.read_csv(bed, sep="\t", names=["Chromosome", "Start", "End"])
+				celltype = bed.split("/")[-1].replace("_L-tron.bed","")
+				celltypes.append(celltype)
+				regions = pr.PyRanges(region_data)
+				intersection = self.snps.intersect(regions)
+				num_intersections = len(intersection)
+				p = num_intersections/self.n_snp_data
+				ps.append(p)
 
+			df_data["n_snps"]    = int(self.n_snp_data)
+			df_data["p_succes"]  = ps
+			df_data.index        = celltypes
+		else:
+			info_ps = pd.read_csv('%s/%s/%s_ps.csv'%(self.URL, self.collection_name_dict[self.collection_name], self.collection_name_dict[self.collection_name]), index_col=0, sep='\t')
+			df_data["n_snps"] = info_ps['n_snps']
+			df_data["p_succes"] = info_ps['p_succes']
+### new
+
+
+# 		if not os.path.exists(self.tmp):
+# 			os.makedirs(self.tmp)
+# 		pybedtools.set_tempdir(self.tmp)
+
+# 		xs = []
+# 		df_bed = pybedtools.BedTool.from_dataframe(df_genetics)
+# 		print("Intersecting genetic with peak regions ...")
+# 		for bed in tqdm(beds):
+# 			tmp = pd.read_csv(bed, sep="\t", names=["chrom", "start", "end"])
+# 			tmp_bed = pybedtools.BedTool.from_dataframe(tmp)
+# 			intersect_bed = df_bed.intersect(tmp_bed)
+# 			intersect_bed = intersect_bed.to_dataframe()
+# 			if intersect_bed.empty:
+# 				xs.append(0.0)
+# 			else:
+# 				xs.append(intersect_bed.shape[0])
+# 		df_data["GWAS_init"] = xs
+# 		return df_data
+
+		df_genetics.columns = ['Chromosome', 'Start', 'End', 'SNPS']   
+		py_df_genetics = pr.PyRanges(df_genetics[['Chromosome', 'Start', 'End']])
 		xs = []
-		df_bed = pybedtools.BedTool.from_dataframe(df_genetics)
-		print("Intersecting genetic with peak regions ...")
 		for bed in tqdm(beds):
-			tmp = pd.read_csv(bed, sep="\t", names=["chrom", "start", "end"])
-			tmp_bed = pybedtools.BedTool.from_dataframe(tmp)
-			intersect_bed = df_bed.intersect(tmp_bed)
-			intersect_bed = intersect_bed.to_dataframe()
-			if intersect_bed.empty:
-				xs.append(0.0)
-			else:
-				xs.append(intersect_bed.shape[0])
+			region_data = pd.read_csv(bed, sep="\t", names=['Chromosome', 'Start', 'End']  )
+			regions = pr.PyRanges(region_data)
+			intersection = py_df_genetics.intersect(regions)
+			num_intersections = len(intersection)
+			xs.append(num_intersections)
 		df_data["GWAS_init"] = xs
-		return df_data
-
-
-	def __download_background(self):
-
-		"""\
-			Download background from 1000genomes for enrichment score.
-		"""
-		
-		if not os.path.exists(self.folds):
-			os.makedirs(self.folds)
-		if not os.path.isfile(self.folds+os.sep+"ALL_1000_genomes.variants.%s.bed"%self.genome):
-			print("Downloading %s ALL 1000 genomes background..."%self.genome)
-			_ = subprocess.run('wget -P %s/ %s'%(self.folds, self.background), shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-
-	def _shuf(self, command):
-
-		"""\
-			Subprocess for shuffling and extracting genetics from 1000genomes.
-
-			Parameters
-			----------
-			command : str
-				Bash command for shuffle and extract genetics.
-		"""
-		
-		return subprocess.run(command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-
-	def __shuffle_background(self, number_of_genetic, idx):
-
-		"""\
-			Shuffle and extract genetics from 1000genomes.
-
-			Parameters
-			----------
-			number_of_genetic : int
-				Number of variant to extract from 1000genomes.
-			idx : int
-				Fold index for background extraction.
-		"""
-		
-		print("For each fold, parallelised shuffling background ...")
-
-		if not os.path.exists(self.folds+os.sep+"round%s"%idx):
-			os.makedirs(self.folds+os.sep+"round%s"%idx)
-
-		commands = []
-		for f in range(1, self.number_of_folds+1):
-			commands.append("shuf -n %s %s | sort -k1,1 -k2,2n > %s/%s/SUB%s.bed"%(number_of_genetic, self.folds+os.sep+"ALL_1000_genomes.variants.%s.bed"%self.genome, self.folds, "round%s"%idx, f))
-
-		with mp.Pool() as pool:
-			_ = pool.map(self._shuf, commands)
-
-
-	def __create_background(self, number_of_genetic, idx):
-
-		"""\
-			Create background for enrichment score.
-
-			Parameters
-			----------
-			number_of_genetic : int
-				Number of variant to extract from 1000genomes.
-			idx : int
-				Fold index for background extraction.
-		"""
-		
-		self.__download_background()
-		self.__shuffle_background(number_of_genetic, idx)
-		
-	
-	def __add_shuffled_background(self, df_data, beds, idx):
-
-		"""\
-			Load shuffled background to initilised enrichment score DataFrame.
-
-			Parameters
-			----------
-			df_data : pandas.DataFrame
-				DataFrame of initialised information for encrichment score calculation.
-			beds : list
-				List of beds files per datacollection ordered per cell type within data collection.
-			idx : pandas.DataFrame
-				Fold index for loading extracted background.
-
-			Returns
-			-------
-			df_data : pandas.DataFrame
-				DataFrame of initialised and background information for encrichment score calculation.
-		"""
-		
-		print("Adding shuffled background ...")
-		for idx_f, fold in enumerate(tqdm(glob.glob("%s/round%s/SUB*.bed"%(self.folds, idx)))):
-			df_fold = pd.read_csv(fold, sep="\t", header=None)[[0,1,2]]
-			xs_fold = []
-			df_bed = pybedtools.BedTool.from_dataframe(df_fold)
-			for bed in beds:
-				try:
-					tmp = pd.read_csv(bed, sep="\t")
-					tmp_bed = pybedtools.BedTool.from_dataframe(tmp)
-					intersect_bed = df_bed.intersect(tmp_bed)
-					intersect_bed = intersect_bed.to_dataframe()
-					xs_fold.append(intersect_bed.shape[0])
-				except:
-					xs_fold.append(0.0)
-			df_data["bg_%s"%(idx_f+1)] = xs_fold		
+        
 		return df_data
 
 
@@ -460,79 +471,46 @@ class crestgv():
 
 		print("Calculating statistics ...")
 
-		df_data["P_gwas"] = stats.binom.pmf(df_data["GWAS_init"], number_of_genetic, df_data["p_succes"])
+		df_data["pmf"] = stats.binom.pmf(df_data["GWAS_init"], number_of_genetic, df_data["p_succes"])
+		df_data["sf"] = stats.binom.sf(df_data["GWAS_init"]-1, number_of_genetic, df_data["p_succes"])
+		
+		df_data["check_np"] = number_of_genetic*df_data["p_succes"]
+		df_data["check_n(1-p)"] = number_of_genetic*(1-df_data["p_succes"])
+		
+		df_data["p_hat"] = df_data["GWAS_init"]/number_of_genetic
+		
+		df_data["SE"] = np.sqrt((df_data["p_succes"]*(1-df_data["p_succes"]))/number_of_genetic)
+		
+		df_data["Z"] = (df_data["p_hat"]-df_data["p_succes"])/(df_data["SE"])
+		df_data["pdf"] = stats.norm.sf(df_data["Z"])
+        
+		df_data["Z_norm"] = (df_data["Z"]-np.mean(df_data["Z"]))/np.std(df_data["Z"])
+		df_data["pdf_cgv_norm"] = stats.norm.sf(df_data["Z_norm"])
 
-		for f in range(1, self.number_of_folds+1):
-			df_data["P_ss%s"%f]  = stats.binom.pmf(df_data["bg_%s"%f], number_of_genetic, df_data["p_succes"])
-			df_data["FOLD%s"%f] = -np.log10(df_data["P_gwas"])/-np.log10(df_data["P_ss%s"%f])
-		col = df_data.loc[: , "FOLD1":"FOLD%s"%f]
-		df_data['CREST-GV'] = col.mean(axis=1)
+		df_data["CREST-GV"] = df_data["Z"]
+		df_data["CREST-GV_pval"] = df_data["pdf"]
+# 		df_data["CREST-GV_pval_adjust"] = stats.false_discovery_control(df_data["CREST-GV_pval"], method='by')
+        
+		df_data["CREST-GV_norm"] = df_data["Z_norm"]
+		df_data["CREST-GV_pval_norm"] = df_data["pdf_cgv_norm"]
+# 		df_data["CREST-GV_pval_norm_adjust"] = stats.false_discovery_control(df_data["CREST-GV_pval_norm"], method='by')
+
 
 		return df_data
 
 
-	def __clean_tmp(self):
+# 	def __clean_tmp(self):
 
-		"""\
-			Delete temporary files.
-		"""
+# 		"""\
+# 			Delete temporary files.
+# 		"""
 		
-		print("Cleaning temporary files ...")
-		shutil.rmtree(self.tmp)
+# 		print("Cleaning temporary files ...")
+# 		shutil.rmtree(self.tmp)
 
 
-	def __parallel_background(self, idx, df_genetics):
 
-		"""\
-			Parallel computation for background estimation.
-
-			Parameters
-			----------
-			idx : pandas.DataFrame
-				Fold index for loading extracted background.
-			df_genetics : pandas.DataFrame
-				DataFrame of filtered genetics.
-
-			Returns
-			-------
-			df_genetics : pandas.DataFrame
-				DataFrame of filtered genetics.
-		"""
-		
-		number_of_genetic = df_genetics.shape[0]
-		self.__create_background(number_of_genetic, idx)
-		return idx, number_of_genetic
-
-
-	def _parallel_ces(self, idx, df_collection, number_of_genetic, beds):
-
-		"""\
-			Parallel computation for enrichment score calculation.
-
-			Parameters
-			----------
-			idx : pandas.DataFrame
-				Fold index to add background and enrichment score calculation per fold.
-			df_collection : pandas.DataFrame
-				Enrichment score DataFrame.
-			number_of_genetic : int
-				Number of variant to extract from 1000genomes.
-			beds : list
-				List of beds files per datacollection ordered per cell type within data collection..
-
-			Returns
-			-------
-			df_genetics : pandas.DataFrame
-				Description
-		"""
-		
-		df_collection = self.__add_shuffled_background(df_collection, beds, idx)
-		df_collection = self.__add_statistics(df_collection, number_of_genetic)
-		df_collection.to_csv(self.output+os.sep+"rounds"+os.sep+"statistics_intermediate_round%s.csv"%(idx+1), sep="\t")
-		return df_collection
-
-
-	def calculate_enrichment_score(self, lessNG=False, greater25k=False):
+	def calculate_enrichment_score(self):
 
 		"""\
 			Calculate enrichment score for provided genetics per selected data collection.
@@ -549,56 +527,26 @@ class crestgv():
 			dfs_collection : pandas.DataFrame
 				Final enrichment score DataFrame for provided genetics and selected data collection.
 		"""
-		
+
 		if self.genetic_file is None:
 			sys.exit("Error, missing genetic file.")
-		
-		df_genetics = self.__load_genetic(lessNG=lessNG, greater25k=greater25k)
 
-		if (lessNG) & (df_genetics.shape[0]<self.min_number_genetics):
-			df_genetics_list = [df_genetics]
-		else:
-			df_genetics_list = []
-			sub_n = self.min_number_genetics
-			df_genetics_init = df_genetics.sample(sub_n, random_state=self.seed)
-			df_genetics_list.append(df_genetics_init)
-			for i in range(int(df_genetics.shape[0]/sub_n)-1):
-				if i == 0:
-					df_genetics_rest = df_genetics[~df_genetics.index.isin(df_genetics_init.index)]
-				else:
-					df_genetics_rest = df_genetics_rest[~df_genetics_rest.index.isin(df_genetics_round.index)]
-				df_genetics_round = df_genetics_rest.sample(sub_n, random_state=42)
-				df_genetics_list.append(df_genetics_round)
+		df_genetics = self.__load_genetic()
 
 		info, _, beds = self.__loading_collection_data()
-		idx_list, df_collection_list, number_of_genetic_list = [], [], []
-		for idx, df_genetic in enumerate(df_genetics_list):
-			df_collection = self.__prepare_data(beds, df_genetic)
-			idx_return , number_of_genetic_return = self.__parallel_background(idx, df_genetic)
-			idx_list.append(idx_return)
-			df_collection_list.append(df_collection)
-			number_of_genetic_list.append(number_of_genetic_return)
+        
+		df_collection = self.__prepare_data(beds, df_genetics)
 
-		if not os.path.exists(self.output+os.sep+"rounds"):
-			os.makedirs(self.output+os.sep+"rounds")
+		df_collection = self.__add_statistics(df_collection, df_genetics.shape[0])
 
-		n_cpu = mp.cpu_count()
-		pool = mp.Pool(n_cpu)
-		_ = [pool.apply(self._parallel_ces, args=(idx, df_collection, number_of_genetic, beds)) for idx, df_collection, number_of_genetic in zip(idx_list, df_collection_list, number_of_genetic_list)]
-		# _ = [pool.apply_async(self._parallel_ces, args=(idx, df_collection, number_of_genetic, beds)) for idx, df_collection, number_of_genetic in zip(idx_list, df_collection_list, number_of_genetic_list)]
-		pool.close()
+		if not os.path.exists(self.output):
+			os.makedirs(self.output)
+		df_collection.to_csv(self.output+os.sep+"%s_statistics_CREST-GV.csv"%self.collection_name, sep="\t")
 
-		dfs_collection = [pd.read_csv(df_path, sep="\t", index_col=0)[['CREST-GV']] for df_path in glob.glob(self.output+os.sep+"rounds"+os.sep+"*.csv")]
-		dfs_collection = pd.concat(dfs_collection, axis=1)
-		dfs_collection['CREST-GV_all'] = dfs_collection.mean(axis=1)
-		dfs_collection = dfs_collection[['CREST-GV_all']]
-
-		dfs_collection.to_csv(self.output+os.sep+"statistics_CREST-GV.csv", sep="\t")
-
-		self.__clean_tmp()
+# 		self.__clean_tmp()
 		print("Processing genetics finished.")
 
-		return dfs_collection
+		return df_collection
 
 
 	def get_coverage(self):
@@ -612,7 +560,7 @@ class crestgv():
 				Final enrichment score DataFrame for provided genetics and selected data collection.
 		"""
 
-		self.genetic_df = self.__load_genetic(lessNG=True, greater25k=True)
+		self.genetic_df = self.__load_genetic()
 		self.genetic_df['CHR_POS+1'] = self.genetic_df['CHR_POS']+1
 
 		info, bigwigs, _ = self.__loading_collection_data()

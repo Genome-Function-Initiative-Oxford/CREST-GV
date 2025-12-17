@@ -17,7 +17,7 @@ collections = [ 'cad',
 				'super_pbmc'
 			   ]
 
-genetic = "/project/Wellcome_Discovery/sriva/Git/CREST-GV/genetics_test/Bcell_GO_0035456.tsv"
+genetic = "<genetic_path>"
 
 for collection in collections:
 	cgv = crestgv(genetic=genetic, output="test/%s"%collection, collection_name=collection)
