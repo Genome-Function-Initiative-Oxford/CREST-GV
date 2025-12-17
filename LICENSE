@@ -1,0 +1,76 @@
+Academic Non-Commercial Software License (Hybrid CC BY-NC + MIT)
+
+Copyright (c) 2025
+Simone Riva
+MRC Weatherall Institute of Molecular Medicine
+University of Oxford
+
+This Software is also licensed in collaboration with Nucleome Therapeutics
+(https://nucleome.com/).
+
+Permission is hereby granted, free of charge, to any person or
+organization to use, copy, modify, and distribute this software (the
+"Software") for non-commercial and academic research purposes, subject
+to the following terms and conditions:
+
+1.  Non-Commercial Use "Non-Commercial" means any use that is not
+    primarily intended for, or directed toward, commercial advantage or
+    monetary compensation. The Software may NOT be used in any
+    commercial product, service, or environment without explicit written
+    permission from the copyright holder. Commercial use includes (but
+    is not limited to):
+
+    -   use within a for-profit company,
+    -   use in a product, platform, or service offered for sale or
+        subscription,
+    -   use in paid consulting, contract work, or fee-based analysis,
+    -   integration into proprietary or closed-source systems,
+    -   any activity generating financial profit or operational
+        advantage.
+
+2.  Academic and Research Use Academic institutions, researchers,
+    educators, and students may:
+
+    -   use the Software for scientific research and teaching,
+    -   modify the Software for academic work,
+    -   publish results obtained using the Software,
+    -   redistribute the Software for academic research purposes.
+
+3.  Attribution Any use, redistribution, or publication involving the
+    Software must provide clear attribution by citing:
+
+    -   the original GitHub repository,
+    -   the author: Simone Riva,
+    -   the MRC Weatherall Institute of Molecular Medicine, University
+        of Oxford,
+    -   and, where relevant, associated manuscripts or publications.
+
+4.  Redistribution Redistribution of the Software or modified versions
+    is permitted only for non-commercial purposes and must:
+
+    -   include this full License without modification,
+    -   retain all copyright notices,
+    -   clearly document any changes made.
+
+5.  Derivative Works You may create derivative works solely for
+    non-commercial purposes. These works must be released under this
+    same license or another compatible non-commercial license.
+
+6.  No Warranty THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+    ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+    WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
+    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+    BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
+    ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+7.  Commercial Licensing For commercial licensing, collaboration, or
+    technology transfer inquiries, please contact:
+    simone.riva@imm.ox.ac.uk
+
+This license incorporates the attribution and non-commercial
+restrictions of Creative Commons BY-NC 4.0
+(https://creativecommons.org/licenses/by-nc/4.0/) while adapting the
+terms for software distribution consistent with MIT-style permissions
+for non-commercial academic use.
