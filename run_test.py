@@ -20,6 +20,5 @@ collections = [ 'cad',
 genetic = "<genetic_path>"
 
 for collection in collections:
-	cgv = crestgv(genetic=genetic, output="test/%s"%collection, collection_name=collection)
-	_ = cgv.calculate_enrichment_score(lessNG=False)
-	_ = cgv.get_coverage()
+	cgv = crestgv(genetic=genetic, output="test/%s"%collection, collection_name=collection, min_number_genetics=100)
+	_ = cgv.calculate_enrichment_score()

@@ -58,19 +58,16 @@ conda env export > crestgv_environment_versions.yml
 
 ## How to use CREST-GV
 
-There are 2 ways to use CREST-GV:
-
-#### 1) from a code editor (e.g., VS Code) or a web-based interactive computing (e.g., Jupyter Notebook):
+#### from a code editor (e.g., VS Code) or a web-based interactive computing (e.g., Jupyter Notebook):
 ```
 import pandas as pd
 import sys
 sys.path.append('crestgv/')
 from crestgv import crestgv
 
-genetic    = "genetics_test/Bcell_GO_0035456.tsv"
-es         = crestgv(genetic=genetic, output="Test", collection_name="super_pbmc")
-df_crestgv = es.calculate_enrichment_score(less100=False, greater25k=False)
-df_cover   = es.get_coverage()
+genetic = "<Genetic path>"
+cvg     = crestgv(genetic=genetic, output="<Name output directory>", collection_name="<Collection name>")
+df_cvg  = cvg.calculate_enrichment_score()
 ```
 
 You can find some helpful parameter information using:
@@ -78,79 +75,6 @@ You can find some helpful parameter information using:
 cgv = crestgv(genetic=genetic)
 help(cgv)
 ```
-
-We created a Jupyter Notebook with a heatmap plot as CREST-GV example run (see [heatmap_test.ipynb](https://github.com/Genome-Function-Initiative-Oxford/CREST-GV/blob/main/heatmap_test.ipynb)).
-
-#### 2) from a terminal:
-- for a single data collection ```python crestgv.py -g genetics_test/Bcell_GO_0035456.tsv -cn super_pbmc -o test_api/single_run```
-- for all data collection ```python crestgv.py -g genetics_test/Bcell_GO_0035456.tsv -o test_api/all_run -ra True```
-
-Here some usage information
-```
-usage: crestgv.py \
-	-g/--genetic [Required. Path to genetic file.] : str \
-	-nof/--number_of_folds [Number of folds to create backgound using the 1000genomes.] : int \
-	-o/--output [Directory where to save the scores.]  : str \
-	-gb/--genome [Genome to use, available 'hg19' and 'hg38'.] : str \
-	-s/--seed [Seed for reproducibility, shuffle 1000genomes excluded.] : int \
-	-cn/--collection_name [Data collection name, available 'cad', 'calderon', 'catlas_fetal', 'catlas_adult', 'erythoid_d7_d10_d13_d17', 'h1_hescs', 'immune_cell', 'ludwig2019', 'mpal', 'pancreatic_pbmc', and 'super_pbmc'.] : str \
-	-incp/--in_house_collection_path [In house data collection path (<path-to-directory>/<collection-name>).] : str \
-	-l100/--less100 [Boolean variable to force the software to run also with less than 100 variants per file.] : bool \
-	-g25k/--greater25k [Boolean variable to check if you want to run CREST-GV on more than 25k variants.] : bool \
-	-gc/--get_coverage [Run only coverage calculation. Enrichment score will be ignored.] : bool \
-	-ra/--run_all [Run CREST-GV for all data collection. If -cn or -incp are set, they will be ignored.] : bool
-
-```
-
-***
-
-### Output CREST-GV result
-
-CREST-GV will create the following tree-like format result (see [heatmap_test folder](https://github.com/Genome-Function-Initiative-Oxford/CREST-GV/tree/main/heatmap_test) example).
-
-```
-heatmap_test
-├── coverage.csv
-├── folds
-│   ├── round0
-│   │   ├── SUB1.bed
-│   │   ├── SUB2.bed
-│   │   ├── SUB3.bed
-│   │   ├── SUB4.bed
-│   │   └── SUB5.bed
-│   ├── round1
-│   │   ├── SUB1.bed
-│   │   ├── SUB2.bed
-│   │   ├── SUB3.bed
-│   │   ├── SUB4.bed
-│   │   └── SUB5.bed
-│   ├── round2
-│   │   ├── SUB1.bed
-│   │   ├── SUB2.bed
-│   │   ├── SUB3.bed
-│   │   ├── SUB4.bed
-│   │   └── SUB5.bed
-│   ├── round3
-│   │   ├── SUB1.bed
-│   │   ├── SUB2.bed
-│   │   ├── SUB3.bed
-│   │   ├── SUB4.bed
-│   │   └── SUB5.bed
-│   └── round4
-│       ├── SUB1.bed
-│       ├── SUB2.bed
-│       ├── SUB3.bed
-│       ├── SUB4.bed
-│       └── SUB5.bed
-├── rounds
-│   ├── statistics_intermediate_round1.csv
-│   ├── statistics_intermediate_round2.csv
-│   ├── statistics_intermediate_round3.csv
-│   ├── statistics_intermediate_round4.csv
-│   └── statistics_intermediate_round5.csv
-└── statistics_CREST-GV.csv
-```
-
 
 ***
 
