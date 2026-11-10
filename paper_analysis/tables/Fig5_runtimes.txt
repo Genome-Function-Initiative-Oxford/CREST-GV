@@ -1,0 +1,2 @@
+Panel a (re-upload cad, platelet_measurement): 163.59s
+Panel b (fresh osteoporosis, 11 collections): 54.62s

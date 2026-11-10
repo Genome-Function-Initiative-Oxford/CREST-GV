@@ -1,0 +1,13 @@
+collection,profiles_collected,profiles_retained_after_qc,source
+cad,10,10,Turner et al.
+catlas_fetal,111,60,Zhang et al.
+catlas_adult,111,45,Zhang et al.
+mpal,23,23,Granja et al.
+super_pbmc,19,19,10x Genomics
+calderon,175,175,Calderon et al.
+ludwig2019,8,8,Ludwig et al.
+erythoid_d7_d10_d13_d17,15,13,Scott et al.
+h1_hescs,4,4,GEO GSE124853
+immune_cell,15,14,GEO GSE125164
+greenleaf_brain,20,19,Trevino et al.
+Total,511,390,
