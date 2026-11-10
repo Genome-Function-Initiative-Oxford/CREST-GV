@@ -1,0 +1,5 @@
+trait	n_cell_types	n_significant_CHEERS	n_significant_CREST-GV	n_significant_both	n_significant_either
+heart_rate	390	158	2	2	158
+red_blood_cell_traits	390	348	2	2	348
+type_1_diabetes_mellitus	390	236	2	2	236
+type_2_diabetes_mellitus	390	331	0	0	331

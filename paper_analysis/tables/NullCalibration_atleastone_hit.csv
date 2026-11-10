@@ -1,0 +1,9 @@
+trait,alpha,p_at_least_one_false_hit,n_cell_types_tested
+heart_rate,0.05,1.0,390
+heart_rate,0.01,0.99,390
+red_blood_cell_traits,0.05,1.0,390
+red_blood_cell_traits,0.01,0.98,390
+type_1_diabetes_mellitus,0.05,1.0,390
+type_1_diabetes_mellitus,0.01,0.98,390
+type_2_diabetes_mellitus,0.05,1.0,390
+type_2_diabetes_mellitus,0.01,0.97,390

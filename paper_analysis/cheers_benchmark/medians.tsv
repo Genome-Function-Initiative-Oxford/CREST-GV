@@ -1,0 +1,22 @@
+overall_median_spearman_rho	0.6437
+
+per_trait_median_spearman_rho
+trait	median_spearman_rho
+type_1_diabetes_mellitus	0.7146819495845139
+red_blood_cell_traits	0.6736288187068871
+heart_rate	0.590203893729056
+type_2_diabetes_mellitus	0.5208791208791209
+
+per_collection_median_spearman_rho
+collection	median_spearman_rho
+erythoid_d7_d10_d13_d17	0.8708791208791209
+cad	0.7612272191217323
+greenleaf_brain	0.7526315789473684
+h1_hescs	0.7
+catlas_fetal	0.6669135691398411
+immune_cell	0.6122137855744378
+mpal	0.5247780373329648
+catlas_adult	0.4734785592472063
+super_pbmc	0.4440544525770498
+calderon	0.12153071165891574
+ludwig2019	0.023809523809523822

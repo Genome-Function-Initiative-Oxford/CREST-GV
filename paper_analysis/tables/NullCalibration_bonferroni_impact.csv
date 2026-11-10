@@ -1,0 +1,5 @@
+trait,n_significant_at_P_0.01,n_surviving_bonferroni_FWER0.05,surviving_cell_types
+heart_rate,8,1,catlas_fetal_A_Cardiomyocyte
+red_blood_cell_traits,6,1,catlas_fetal_Erythroblast_2
+type_1_diabetes_mellitus,7,2,"catlas_adult_T_Lymphocyte_1__CD8_positive;catlas_fetal_T_Lymphocyte_1__CD4_positive"
+type_2_diabetes_mellitus,2,0,
