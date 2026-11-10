@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crestgv"
+version = "0.3.0"
+description = "CREST-GV: Cell types Ranking and Enrichment Score for selecTive Genetic Variants"
+readme = "README.md"
+license = "LicenseRef-Academic-Non-Commercial"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Simone G. Riva", email = "simone.riva@imm.ox.ac.uk" },
+]
+requires-python = ">=3.9"
+keywords = ["GWAS", "chromatin accessibility", "cell type enrichment", "genomics"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Programming Language :: Python :: 3",
+    "Operating System :: POSIX",
+    "Operating System :: MacOS",
+]
+dependencies = [
+    "pandas>=1.5",
+    "numpy>=1.23",
+    "scipy>=1.9",
+    "pyranges>=0.0.120",
+    "pyBigWig>=0.3.18",
+    "tqdm>=4.60",
+]
+
+[project.urls]
+Homepage = "https://github.com/Genome-Function-Initiative-Oxford/CREST-GV"
+Issues = "https://github.com/Genome-Function-Initiative-Oxford/CREST-GV/issues"
+
+[project.scripts]
+crestgv = "crestgv.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

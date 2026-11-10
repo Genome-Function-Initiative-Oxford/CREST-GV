@@ -1,106 +1,141 @@
 # CREST-GV - Cell types Ranking and Enrichment Score for selecTive Genetic Variants
 
-CREST-GV is a method which allows querying [our described data collection](https://github.com/Genome-Function-Initiative-Oxford/CREST-GV/blob/main/our_collection/data_collection.txt) of ~500 cell types (we keep piling more data to add to the data collection) to determine the enrichment score of a set of genetic variants. CREST-GV rely on peak properties for each cell type in the data collection leveraging [LanceOtron](https://github.com/LHentges/LanceOtron) peak caller.
-CREST-GV can also query your personal (in-house) data where formatted correctly (see [In-house data format](#In-house-data-format) section for a properly formatted data structure), in this case, the user can rely on the peak caller of their own choice.
-The only mandatory input for the tool is the path of a genetic file, stored following the format shown in [Genetic variant file format](#genetic-variant-file-format) section.
+CREST-GV tests whether a set of trait-associated genetic variants is enriched in the open
+chromatin of each cell type of a chromatin accessibility collection, relative to a
+trait-agnostic background (1000 Genomes Project variants). It can query the
+[reference data collection](our_collection/data_collection.txt) of published bulk and
+single-cell ATAC-seq datasets, leveraging [LanceOtron](https://github.com/LHentges/LanceOtron)
+peak calls, or your own in-house data (see [In-house data format](#in-house-data-format)).
+
+The only mandatory input is a genetic variant file in the format described in
+[Genetic variant file format](#genetic-variant-file-format).
 
 ***
 
-## Getting started
-CREST-GV can be uesed and run using the __crestgv__ conda envrironment. Please follow the installation instruction detailed below.
+## Installation
 
-### Installation instructions for conda environment
+### From PyPI (recommended)
 
-This section rely on the assumption that any distribution of ```Conda``` (e.g., [Anaconda](https://www.anaconda.com), [Miniconda](https://docs.conda.io/en/latest/miniconda.html), ...) or [```Mamba```](https://mamba.readthedocs.io/en/latest/index.html) is already installed.
-
-#### Clone the repository
+```bash
+pip install crestgv
 ```
-git clone git@github.com:Genome-Function-Initiative-Oxford/CREST-GV.git
+
+This installs the `crestgv` Python package and the `crestgv` command-line tool.
+`pyBigWig` and `pyranges` wheels are platform-dependent; if `pip install` fails to build
+them, install via conda/mamba instead (see below) or install `pyBigWig`/`pyranges` from
+conda-forge/bioconda first, then `pip install crestgv` in the same environment.
+
+### From source
+
+```bash
+git clone https://github.com/Genome-Function-Initiative-Oxford/CREST-GV.git
 cd CREST-GV
+pip install -e .
 ```
 
- 
-#### Create Anaconda environment
-Activate the conda 'base' environment (if not active): 
-```
-conda activate base
-```
+### Conda/mamba environment (alternative)
 
-There are two ways to create the conda env __crestgv__ environment:
-1) Using mamba (if ```Mamba``` is installed), and follow the on screen instructions:
-```
-mamba env create --file=envs/crestgv.yml
-```
-2) Using conda, and follow the on screen instructions.
-```
-conda env create --file=envs/crestgv.yml
-```
-
-#### Activate the environment
-Now, the __crestgv__ environment is created it needs to be activated: 
-```
+```bash
+git clone https://github.com/Genome-Function-Initiative-Oxford/CREST-GV.git
+cd CREST-GV
+mamba env create --file=envs/environment.yml   # or: conda env create --file=envs/environment.yml
 conda activate crestgv
+pip install -e .
 ```
-You can then use CREST-GV using this environment, enjoy!
 
-### Environment installation note
-CREST-GV has been successfully tested for the following operating systems: Ubuntu, CentOS, macOS (Intel CPU), and Windows. Unfortunately, it is not possible to install on macOS with M CPUs at the moment. 
-For any error in the installation step, please open an [issue](https://github.com/Genome-Function-Initiative-Oxford/CREST-GV/issues) so we can give a general solution for users.
+### Note on peak calling
 
-### Reproducibility :repeat:
-If required for publication, package versions within the environment can be exported as follows:
-```
-conda activate crestgv
-conda env export > crestgv_environment_versions.yml
-```
+CREST-GV's statistics are computed over existing peak calls; it does not call peaks
+itself. Peak files for the reference collections must be generated with
+[LanceOtron](https://github.com/LHentges/LanceOtron) (the full LanceOtron output columns
+are not required by CREST-GV itself, but the `<cell-type>_L-tron.bed`/`.bed` naming and
+3-column `chrom, start, end` content are). For in-house collections you may use any peak
+caller of your choice, as long as each peak file is a plain tab-separated
+`chrom, start, end` BED file.
 
 ***
 
 ## How to use CREST-GV
 
-#### from a code editor (e.g., VS Code) or a web-based interactive computing (e.g., Jupyter Notebook):
-```
-import pandas as pd
-import sys
-sys.path.append('crestgv/')
+### As a library
+
+```python
 from crestgv import crestgv
 
-genetic = "<Genetic path>"
-cvg     = crestgv(genetic=genetic, output="<Name output directory>", collection_name="<Collection name>")
-df_cvg  = cvg.calculate_enrichment_score()
+cgv = crestgv(
+    genetic="path/to/genetic.tsv",
+    output="path/to/output_directory",
+    collection_name="cad",   # or in_house_collection_path="path/to/my-collection"
+)
+df = cgv.calculate_enrichment_score()
 ```
 
-You can find some helpful parameter information using:
+For the full list of accepted `collection_name` values:
+
+```python
+from crestgv import COLLECTION_NAME_DICT
+print(list(COLLECTION_NAME_DICT))
 ```
-cgv = crestgv(genetic=genetic)
-help(cgv)
+
+Per-parameter help:
+
+```python
+help(crestgv)
+```
+
+### From the command line
+
+```bash
+crestgv -g path/to/genetic.tsv -o path/to/output_directory -cn cad
+```
+
+```
+usage: crestgv [-h] [-g GENETIC] [-o OUTPUT] [-gb GENOME]
+                [-ng MIN_NUMBER_GENETICS] [-s SEED] [-cn COLLECTION_NAME]
+                [-incp IN_HOUSE_COLLECTION_PATH] [-wc] [-ra]
+                [--list_collections]
+
+  -g, --genetic                  Path to the genetic variant file (required).
+  -o, --output                   Output directory (default: "output").
+  -gb, --genome                  Genome build; only "hg38" is supported.
+  -ng, --min_number_genetics     Minimum variants required after cleaning (default: 500).
+  -s, --seed                     Random seed (default: 42).
+  -cn, --collection_name         Reference collection name.
+  -incp, --in_house_collection_path   Path to an in-house collection directory.
+  -wc, --with_coverage           Also compute per-variant bigwig coverage (large output).
+  -ra, --run_all                 Run for every reference collection.
+  --list_collections              Print available collection names and exit.
 ```
 
 ***
 
-### Genetic variant file format
+## Genetic variant file format
 
-Any genetic variant file provided to CREST-GV has to be tab (\t) separated and must contain at least 3 columns:
-1) "CHR_ID" : chromosome in the follwoing format *chrV*
-2) "CHR_POS" : chromosome position
-3) "SNPS" : ID of the variant (e.g., rs#####, or chrV-pos-ref-alt)
+Tab-separated, **no header row**, exactly 3 columns in this order:
 
-For example like:
+1. Variant ID (`rs#####`, or `chr#-pos-ref-alt`)
+2. Chromosome, as `chr#`
+3. 1-based position
+
 ```
-CHR_ID  CHR_POS SNPS
-chr10   801748  rs60692108
-chr10   823912  rs74876360
-chr10   840700  chr10-840700-A-C
+rs60692108          chr10   801748
+rs74876360          chr10   823912
+chr10-840700-A-C    chr10   840700
 ```
+
+See [`example_files/genetic.tsv`](example_files/genetic.tsv) for a minimal working
+example.
 
 ***
 
-### In-house data format
+## In-house data format
 
-All the data has to be stored in a folder called with your collection name __<collection-name>__, following the tree-like format example below (see [example_files/in-house-data folder](https://github.com/Genome-Function-Initiative-Oxford/CREST-GV/tree/main/example_files/in-house-data) example), where *in-house-data* is the *collection name*.
+All the data for an in-house collection must be stored in a folder named after the
+collection, structured as (see
+[`example_files/in-house-data`](example_files/in-house-data)):
 
 ```
-example_files/in-house-data/
+in-house-data/
 ├── bigwigs
 │   ├── cell_type_1.bw
 │   ├── cell_type_2.bw
@@ -112,32 +147,46 @@ example_files/in-house-data/
     └── cell_type_3.bed
 ```
 
-***
-
-### Pipeline updates :construction:
-If any changes are made to CREST-GV, it is possible to update the repository by entering the main folder and pulling the update using:
-   ```
-   # Enter the main folder
-   cd CREST-GV
-
-   # Pull updates
-   git pull           
-   ```
-Alternatively, remove the cloned repository and then re-clone the repository as described above.   
-Warning: use rm carefully!
-
-```
-rm -rf CREST-GV
-``` 
-<hr>
-
-### :warning: Warning for University of Oxford CCB users :warning:
-When using this repository, use the default terminal and __do not__ load any module in the server (if logged-in).
+`in-house-data_info.csv` lists the cell type names, one per line, matching the bigwig and
+peak file stems. Pass the path to this folder as `in_house_collection_path`.
 
 ***
 
+## Peak-set semantics
+
+Each cell type's variants are intersected against that cell type's own, independently
+called peak set, not a consensus/merged peak set shared across the collection. This keeps
+each cell type's enrichment test self-contained and lets new cell types be added to a
+collection without recomputing anything for the existing ones. If you are comparing
+CREST-GV's output against a method that requires a consensus peak set (e.g. CHEERS), be
+aware the two methods are not scoring literally the same intervals even within the "same"
+collection.
+
+***
+
+## Output statistics
+
+`calculate_enrichment_score()` writes `<output>/<collection_name>_statistics_CREST-GV.csv`
+with one row per cell type. The supported statistics (used for ranking and significance)
+are the normal-approximation ones:
+
+| Column | Meaning |
+|---|---|
+| `CREST-GV` | Raw enrichment Z-score for this cell type, against the trait-agnostic background. |
+| `CREST-GV_pval` | Right-tailed P-value for `CREST-GV`. |
+| `CREST-GV_norm` | `CREST-GV` standardised within the collection (subtract the collection mean, divide by the collection standard deviation). Comparable across collections of different size/scale. |
+| `CREST-GV_pval_norm` | Right-tailed P-value for `CREST-GV_norm`. |
+
+`pmf`/`sf` (exact binomial probability/survival function) are also written but are
+**diagnostic only**: they underflow to exactly `0.0` for strong enrichment in large
+collections and should not be used for ranking or downstream comparison.
+
+***
 
 ### Contact us
-If you have any suggestions, spot any errors, or have any questions regarding the pipelines, please do no hesitate to contact us anytime.   
 
-:email: &emsp; [<simone.riva@imm.ox.ac.uk>](simone.riva@imm.ox.ac.uk)
+If you have any suggestions, spot any errors, or have any questions, please do not
+hesitate to contact us, or open an
+[issue](https://github.com/Genome-Function-Initiative-Oxford/CREST-GV/issues).
+
+:email: [simone.riva@imm.ox.ac.uk](mailto:simone.riva@imm.ox.ac.uk)

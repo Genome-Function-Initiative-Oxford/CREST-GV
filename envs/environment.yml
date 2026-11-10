@@ -1,0 +1,15 @@
+name: crestgv
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python>=3.9
+  - pandas>=1.5
+  - numpy>=1.23
+  - scipy>=1.9
+  - pyranges>=0.0.120
+  - pybigwig>=0.3.18
+  - tqdm>=4.60
+  - pip
+  - pip:
+      - -e .
