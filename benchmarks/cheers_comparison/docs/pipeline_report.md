@@ -1,13 +1,13 @@
 ---
 title: "CREST-GV vs CHEERS: Pipeline Design and RPKM Justification"
 author: "CHEERS repository — CREST-GV_vs_CHEERS pipeline"
-date: "2026-10-13"
+date: "2026-11-10"
 geometry: margin=2.5cm
 ---
 
 # 1. Purpose
 
-CREST-GV produces, for each of 12 reference chromatin accessibility collections, a
+CREST-GV produces, for each of 11 reference chromatin accessibility collections, a
 per-cell-type enrichment statistic (`*_ps.csv`: `n_snps`, `p_success`) describing how
 strongly a set of trait-associated SNPs falls into that cell type's accessible
 chromatin. This pipeline runs the independent, previously published **CHEERS**
@@ -27,7 +27,9 @@ mathematically exact substitution given CHEERS's own normalization steps.
 
 Location: `/project/Wellcome_Discovery/datashare/CREST-GV_collection/`
 
-Twelve collections are used, each with an identical internal layout:
+Eleven collections are used, each with an identical internal layout. (An earlier
+version of this comparison also included `pancreatic_pbmc`; it was subsequently
+dropped from the released atlas for poor data quality and is excluded here too.)
 
 | Internal key | On-disk directory |
 |---|---|
@@ -40,7 +42,6 @@ Twelve collections are used, each with an identical internal layout:
 | `immune_cell` | `immune_cell` |
 | `ludwig2019` | `ludwig2019` |
 | `mpal` | `MPAL` |
-| `pancreatic_pbmc` | `pancreatic_pbmc` |
 | `super_pbmc` | `super_PBMC` |
 | `greenleaf_brain` | `greenleaf_brain` |
 
@@ -58,6 +59,10 @@ Within each collection directory:
 Peak calls are made **independently per cell type** — there is no shared consensus
 peak set across cell types within a collection, which CHEERS requires (its
 normalization inner-joins all samples on identical `chr/start/end` coordinates).
+
+The comparison in Section 5 is restricted to the 390 QC-kept (Good/Decent) cell
+types across these 11 collections, not the full 511-profile atlas — the same
+restriction CREST-GV's own precomputed resource applies.
 
 ## 2.2 Trait SNP lists
 
@@ -211,13 +216,14 @@ enrichment p-values, observed mean ranks, and a log file.
   `/package/ucsctools/385/bin/bigWigAverageOverBed`) so subprocess calls work
   without depending on an interactive login shell.
 - `sbatch`/`srun` are available (SLURM cluster); batch submission can be added if
-  running all 12 collections sequentially proves too slow.
+  running all 11 collections sequentially proves too slow.
 
 # 5. Results
 
-The pipeline was run to completion on all 12 collections across all 4 traits
-(48 collection/trait pairs, ~523 bigWigs). All 48 pairs produced normalized
-specificity scores and enrichment p-values; none failed.
+The pipeline was run to completion on all 11 released atlas collections across
+all 4 traits (44 collection/trait pairs, restricted to the 390 QC-kept cell
+types). All 44 pairs produced normalized specificity scores and enrichment
+p-values; none failed.
 
 ## 5.1 A real bug found and fixed during QA: corrupted `bigWigAverageOverBed` output
 
@@ -240,8 +246,8 @@ raised. Every peak tied for rank 1, and every enrichment p-value for
 
 **Fix:** `quantify_bigwigs.py` now rejects any `bigWigAverageOverBed` output
 that is negative, non-finite, or exceeds `config.SANE_SUM_CEILING` (`1e9`, far
-above the ~1e7 maximum legitimate value observed across all 12 collections),
-replacing it with `0.0` and logging a warning. All other 11 collections were
+above the ~1e7 maximum legitimate value observed across all 11 collections),
+replacing it with `0.0` and logging a warning. All other 10 collections were
 re-scanned for the same signature and found clean; only `greenleaf_brain` was
 affected. After the fix, `greenleaf_brain`'s specificity matrix shows 0%
 degenerate rows and enrichment p-values spread sensibly around the theoretical
@@ -263,43 +269,53 @@ implementation intends for this kind of comparison.
 
 | | Value |
 |---|---|
-| Pairs compared | 48 (12 collections x 4 traits) |
-| Median Spearman &rho; | 0.594 |
-| Mean Spearman &rho; | 0.552 |
+| Pairs compared | 44 (11 collections x 4 traits) |
+| Median Spearman &rho; | 0.644 |
+| Mean Spearman &rho; | 0.570 |
 
 By trait (median &rho;):
 
 | Trait | Median &rho; | Range |
 |---|---|---|
-| Type 1 diabetes | 0.706 | 0.343 - 0.933 |
-| Red blood cell traits | 0.594 | -0.143 - 1.000 |
-| Heart rate | 0.513 | -0.190 - 0.907 |
-| Type 2 diabetes | 0.502 | 0.036 - 1.000 |
+| Type 1 diabetes | 0.715 | 0.400 - 0.933 |
+| Red blood cell traits | 0.674 | -0.143 - 1.000 |
+| Heart rate | 0.590 | -0.190 - 0.908 |
+| Type 2 diabetes | 0.521 | 0.036 - 1.000 |
 
 By collection (median &rho; across its 4 traits):
 
 | Collection | Median &rho; | | Collection | Median &rho; |
 |---|---|---|---|---|
-| catlas_adult | 0.785 | | super_pbmc | 0.444 |
-| cad | 0.761 | | erythoid_d7_d10_d13_d17 | 0.420 |
-| greenleaf_brain | 0.751 | | pancreatic_pbmc | 0.358 |
-| catlas_fetal | 0.746 | | calderon | 0.122 |
+| erythoid_d7_d10_d13_d17 | 0.871 | | catlas_adult | 0.473 |
+| cad | 0.761 | | super_pbmc | 0.444 |
+| greenleaf_brain | 0.753 | | calderon | 0.122 |
 | h1_hescs | 0.700 | | ludwig2019 | 0.024 |
-| immune_cell | 0.567 | | mpal | 0.525 |
+| catlas_fetal | 0.667 | | | |
+| immune_cell | 0.612 | | | |
+| mpal | 0.525 | | | |
 
-A caveat on raw significance counts: counting cell types "significant" at
-p<0.05 is lopsided and should **not** be read as a concordance metric - CHEERS
-flags 1,314 cell types significant across all pairs, CREST-GV's normalized
-statistic flags only 78 (71 overlapping). This is not CHEERS finding more real
-signal; CHEERS's raw p-value has no cross-collection calibration and
-underflows toward 0 very easily in large, strongly-enriched collections (see
-Section 5.5). **Rank correlation (&rho;), not the significance count, is the
-concordance metric used throughout this report.**
+Note the ranking changed substantially from an earlier version of this comparison
+(run before a chromatin-track QC pairing bug in `catlas_fetal` was fixed, and before
+`pancreatic_pbmc` was dropped from the atlas): `catlas_adult` was previously the
+highest-concordance collection (0.785) and is now one of the lower ones (0.473);
+`erythoid_d7_d10_d13_d17`, previously mid-pack (0.420), is now the highest (0.871).
+
+A caveat on significance counts: counting cell types "significant" is lopsided and
+should **not** be read as a concordance metric. Using the same Benjamini-Hochberg
+FDR q<0.10 criterion the CREST-GV paper applies throughout (computed within each
+trait, pooled across all 390 kept cell types), CHEERS flags 1,073 of 1,560
+cell-type/trait combinations significant, CREST-GV flags only 6 (all 6 contained
+within CHEERS's set). This is not CHEERS finding more real signal; CHEERS's raw
+p-value has no cross-collection calibration and underflows toward 0 very easily in
+large, strongly-enriched collections (see Section 5.5) - for red blood cell traits
+specifically, 88% of CHEERS's raw p-values already fall below 0.01, with the median
+underflowing to exactly 0. **Rank correlation (&rho;), not the significance count,
+is the concordance metric used throughout this report.**
 
 ## 5.3 Biological validation: top enriched cell types per trait
 
 As an independent face-validity check (not a comparison against CREST-GV),
-CHEERS's own top hits per trait, ranked by Z-score across all 12 collections,
+CHEERS's own top hits per trait, ranked by Z-score across all 11 collections,
 recover the expected biology in every case:
 
 | Trait | Top cell types (by Z-score) |
@@ -311,9 +327,9 @@ recover the expected biology in every case:
 
 ## 5.4 A statistical caveat for small collections
 
-Four collections have few enough cell types that their individual
+Three collections have few enough cell types that their individual
 collection/trait Spearman &rho; should not be over-interpreted:
-`h1_hescs` (n=4), `ludwig2019` (n=8), `CAD` (n=10), `pancreatic_pbmc` (n=12).
+`h1_hescs` (n=4), `ludwig2019` (n=8), `CAD` (n=10).
 Checking statistical significance of the correlation itself (not just its
 point estimate) makes this concrete: **none of `ludwig2019`'s four
 correlations are statistically significant** (p=0.207, 0.651, 0.736, 0.651)
@@ -439,15 +455,16 @@ A review of CREST-GV's source code surfaced several hardening opportunities
 (a stale CLI/class parameter mismatch, division-by-zero risks in `SE` and
 `Z_norm` analogous to the `bigWigAverageOverBed` failure mode found in
 Section 5.1, and the exact-binomial `pmf`/`sf` columns underflowing to exactly
-0.0 for strong signals) - these are tracked separately in
-`CREST-GV/KNOWN_ISSUES.md` and are orthogonal to the comparison results above,
-which use CREST-GV's already-computed, supported output columns
-(`CREST-GV_pval`, `CREST-GV_pval_norm`).
+0.0 for strong signals). These have since been fixed in the refactored
+`crestgv` package released alongside the paper (see this repository's own
+`CHANGELOG.md`) and are orthogonal to the comparison results above, which use
+CREST-GV's already-computed, supported output columns (`CREST-GV_pval`,
+`CREST-GV_pval_norm`).
 
 # 7. Conclusion
 
 CHEERS and CREST-GV show positive, generally moderate-to-strong rank
-concordance (median &rho;=0.594 across 48 well-defined collection/trait pairs)
+concordance (median &rho;=0.644 across 44 well-defined collection/trait pairs)
 on cell types they both identify as most relevant to a trait, and both
 independently recover biologically expected top hits per trait (Section 5.3).
 Where they diverge strongly, the divergence is explainable: either the

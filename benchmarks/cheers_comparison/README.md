@@ -20,7 +20,7 @@ and trait by trait.
   - `compare_with_crestgv.py` — compares CHEERS enrichment against CREST-GV's
     standardised statistic (Spearman rank correlation; BH-FDR significance overlap).
 - `docs/`
-  - `pipeline_report.md`/`.pdf` — full write-up of the pipeline design, including the
+  - `pipeline_report.md` — full write-up of the pipeline design, including the
     derivation for why RPKM-normalised bigWig signal can be used in place of CHEERS's
     expected raw read counts (its normalisation is invariant to per-sample
     multiplicative constants).
