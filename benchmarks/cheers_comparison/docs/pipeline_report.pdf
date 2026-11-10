@@ -1,0 +1,379 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [12 0 R 13 0 R 14 0 R 15 0 R 16 0 R 17 0 R] /Count 6 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier-Bold >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier-Oblique >>
+endobj
+6 0 obj
+<< /Length 4321 >>
+stream
+BT /F2 16.00 Tf 54.00 728.00 Td (CREST-GV vs CHEERS: Pipeline, RPKM Justification,) Tj ET
+BT /F2 16.00 Tf 54.00 707.20 Td (and Results) Tj ET
+BT /F1 8.50 Tf 54.00 682.40 Td (CHEERS repository - CREST-GV_vs_CHEERS pipeline. 2026-10-15.) Tj ET
+BT /F2 13.00 Tf 54.00 654.18 Td (1. Purpose) Tj ET
+BT /F1 9.50 Tf 54.00 633.28 Td (CREST-GV produces, for each of 12 reference chromatin accessibility collections, a per-) Tj ET
+BT /F1 9.50 Tf 54.00 620.74 Td (cell-type enrichment statistic describing how strongly a set of trait-associated SNPs) Tj ET
+BT /F1 9.50 Tf 54.00 608.20 Td (falls into that cell type's accessible chromatin. This pipeline runs the independent,) Tj ET
+BT /F1 9.50 Tf 54.00 595.66 Td (previously published CHEERS \(Chromatin Element Enrichment Ranking by Specificity\) method) Tj ET
+BT /F1 9.50 Tf 54.00 583.12 Td (on the same underlying data - RPKM-normalized bigWig tracks and per-cell-type peak calls) Tj ET
+BT /F1 9.50 Tf 54.00 570.58 Td (- so that CHEERS's enrichment p-values can be compared against CREST-GV's own statistic,) Tj ET
+BT /F1 9.50 Tf 54.00 558.04 Td (collection by collection and trait by trait.) Tj ET
+BT /F1 9.50 Tf 54.00 540.50 Td (CHEERS was not designed to consume bigWig tracks; it expects raw integer read counts per) Tj ET
+BT /F1 9.50 Tf 54.00 527.96 Td (peak. Section 3 explains why RPKM-normalized bigWig signal can be used directly, without) Tj ET
+BT /F1 9.50 Tf 54.00 515.42 Td (reconstructing raw counts, and why that is not a compromise but a mathematically exact) Tj ET
+BT /F1 9.50 Tf 54.00 502.88 Td (substitution given CHEERS's own normalization steps.) Tj ET
+BT /F2 13.00 Tf 54.00 479.34 Td (2. Input data) Tj ET
+BT /F2 11.00 Tf 54.00 452.44 Td (2.1 CREST-GV collections) Tj ET
+BT /F1 9.50 Tf 54.00 434.14 Td (Location: /project/Wellcome_Discovery/datashare/CREST-GV_collection/) Tj ET
+BT /F1 9.50 Tf 54.00 416.60 Td (Twelve collections are used, each with an identical internal layout:) Tj ET
+BT /F2 8.30 Tf 64.00 396.06 Td (Internal key            | On-disk directory) Tj ET
+BT /F1 8.30 Tf 64.00 385.10 Td (------------------------+------------------) Tj ET
+BT /F1 8.30 Tf 64.00 374.15 Td (cad                     | CAD              ) Tj ET
+BT /F1 8.30 Tf 64.00 363.19 Td (calderon                | calderon         ) Tj ET
+BT /F1 8.30 Tf 64.00 352.24 Td (catlas_fetal            | catlas_fetal     ) Tj ET
+BT /F1 8.30 Tf 64.00 341.28 Td (catlas_adult            | catlas_adult     ) Tj ET
+BT /F1 8.30 Tf 64.00 330.32 Td (erythoid_d7_d10_d13_d17 | Days7_10_13_17   ) Tj ET
+BT /F1 8.30 Tf 64.00 319.37 Td (h1_hescs                | H1_hESCs         ) Tj ET
+BT /F1 8.30 Tf 64.00 308.41 Td (immune_cell             | immune_cell      ) Tj ET
+BT /F1 8.30 Tf 64.00 297.46 Td (ludwig2019              | ludwig2019       ) Tj ET
+BT /F1 8.30 Tf 64.00 286.50 Td (mpal                    | MPAL             ) Tj ET
+BT /F1 8.30 Tf 64.00 275.54 Td (pancreatic_pbmc         | pancreatic_pbmc  ) Tj ET
+BT /F1 8.30 Tf 64.00 264.59 Td (super_pbmc              | super_PBMC       ) Tj ET
+BT /F1 8.30 Tf 64.00 253.63 Td (greenleaf_brain         | greenleaf_brain  ) Tj ET
+BT /F1 9.50 Tf 54.00 236.68 Td (Within each collection directory:) Tj ET
+BT /F3 8.30 Tf 64.00 216.14 Td (<collection>/) Tj ET
+BT /F3 8.30 Tf 64.00 205.18 Td (  bigwigs/<cell_type>.bw        # RPKM-normalized, bamCoverage --binSize 1) Tj ET
+BT /F3 8.30 Tf 64.00 194.22 Td (  peaks/<cell_type>_L-tron.bed  # per-cell-type peak calls \(chr, start, end\)) Tj ET
+BT /F3 8.30 Tf 64.00 183.27 Td (  <collection>_info.csv         # cell counts per type) Tj ET
+BT /F3 8.30 Tf 64.00 172.31 Td (  <collection>_qc.csv           # QC labels per type) Tj ET
+BT /F3 8.30 Tf 64.00 161.36 Td (  <collection>_ps.csv           # CREST-GV background calibration \(n_snps, p_success\)) Tj ET
+BT /F1 9.50 Tf 54.00 144.40 Td (Peak calls are made independently per cell type - there is no shared consensus peak set) Tj ET
+BT /F1 9.50 Tf 54.00 131.86 Td (across cell types within a collection, which CHEERS requires \(its normalization inner-) Tj ET
+BT /F1 9.50 Tf 54.00 119.32 Td (joins all samples on identical chr/start/end coordinates\).) Tj ET
+BT /F2 11.00 Tf 54.00 95.78 Td (2.2 Trait SNP lists) Tj ET
+BT /F1 9.50 Tf 54.00 77.48 Td (Four GWAS traits, already in the exact format CHEERS expects \(name, chr, position, tab-) Tj ET
+
+endstream
+endobj
+7 0 obj
+<< /Length 4837 >>
+stream
+BT /F1 9.50 Tf 54.00 738.00 Td (separated, no header\). All four live under) Tj ET
+BT /F1 9.50 Tf 54.00 725.46 Td (/project/Wellcome_Discovery/shared/imputed_genetics_per_trait_collection/, one file per) Tj ET
+BT /F1 9.50 Tf 54.00 712.92 Td (trait:) Tj ET
+BT /F2 8.30 Tf 64.00 692.38 Td (Trait                    | Filename                    ) Tj ET
+BT /F1 8.30 Tf 64.00 681.42 Td (-------------------------+-----------------------------) Tj ET
+BT /F1 8.30 Tf 64.00 670.47 Td (type_1_diabetes_mellitus | type_1_diabetes_mellitus.bed) Tj ET
+BT /F1 8.30 Tf 64.00 659.51 Td (type_2_diabetes_mellitus | type_2_diabetes_mellitus.bed) Tj ET
+BT /F1 8.30 Tf 64.00 648.56 Td (red_blood_cell_traits    | red_blood_cell_traits.bed   ) Tj ET
+BT /F1 8.30 Tf 64.00 637.60 Td (heart_rate               | heart_rate.bed              ) Tj ET
+BT /F2 13.00 Tf 54.00 614.64 Td (3. Why RPKM bigWig signal can be used directly \(no reversal) Tj ET
+BT /F2 13.00 Tf 54.00 597.74 Td (needed\)) Tj ET
+BT /F2 11.00 Tf 54.00 570.84 Td (3.1 The problem) Tj ET
+BT /F1 9.50 Tf 54.00 552.54 Td (The bigWigs were generated with bamCoverage --normalizeUsing RPKM --binSize 1. The) Tj ET
+BT /F1 9.50 Tf 54.00 540.00 Td (original BAM files and per-sample mapped-read counts are not available. RPKM) Tj ET
+BT /F1 9.50 Tf 54.00 527.46 Td (normalization applies, per sample, a single scale factor:) Tj ET
+BT /F3 8.30 Tf 64.00 506.92 Td (scale_i = 1e9 / mapped_reads_i      \(at binSize = 1 bp\)) Tj ET
+BT /F1 9.50 Tf 54.00 489.97 Td (Because RPKM is defined specifically to divide out each sample's total mapped-read) Tj ET
+BT /F1 9.50 Tf 54.00 477.43 Td (count, the genome-wide sum of an RPKM track is INVARIANT to that count. mapped_reads_i) Tj ET
+BT /F1 9.50 Tf 54.00 464.89 Td (cannot be recovered from the bigWig alone - true reversal of RPKM is mathematically) Tj ET
+BT /F1 9.50 Tf 54.00 452.35 Td (impossible, not merely inconvenient.) Tj ET
+BT /F2 11.00 Tf 54.00 428.81 Td (3.2 Why this does not matter for CHEERS) Tj ET
+BT /F1 9.50 Tf 54.00 410.51 Td (CHEERS_normalize.py applies four steps to a peak x sample count matrix. Feeding it RPKM-) Tj ET
+BT /F1 9.50 Tf 54.00 397.97 Td (summed values instead of true raw counts: \(1\) normalize_counts\(\) rescales every sample) Tj ET
+BT /F1 9.50 Tf 54.00 385.43 Td (to match the largest total signal - substituting the RPKM scale factor shows the result) Tj ET
+BT /F1 9.50 Tf 54.00 372.89 Td (differs from the raw-count result by exactly ONE GLOBAL CONSTANT across every sample and) Tj ET
+BT /F1 9.50 Tf 54.00 360.35 Td (peak, not a per-sample bias; \(2\) drop_peaks\(\) \(10th-percentile filter\) is invariant to) Tj ET
+BT /F1 9.50 Tf 54.00 347.81 Td (any positive uniform rescaling; \(3\) quantile_norm\(\) operates on within-column ranks,) Tj ET
+BT /F1 9.50 Tf 54.00 335.27 Td (unaffected by positive scaling; \(4\) euclidean_norm\(\) divides each peak's row by its own) Tj ET
+BT /F1 9.50 Tf 54.00 322.73 Td (Euclidean norm, which EXACTLY CANCELS any remaining global constant: \(k*z\)/||k*z|| =) Tj ET
+BT /F1 9.50 Tf 54.00 310.19 Td (z/||z||.) Tj ET
+BT /F1 9.50 Tf 54.00 292.65 Td (CONCLUSION: the final specificity scores are mathematically identical whether CHEERS is) Tj ET
+BT /F1 9.50 Tf 54.00 280.11 Td (given true raw counts or RPKM-normalized bigWig signal over the same peaks, provided the) Tj ET
+BT /F1 9.50 Tf 54.00 267.57 Td (RPKM scale factor is a pure per-sample constant applied uniformly - exactly what) Tj ET
+BT /F1 9.50 Tf 54.00 255.03 Td (bamCoverage --normalizeUsing RPKM --binSize 1 produces. No RPKM reversal is performed) Tj ET
+BT /F1 9.50 Tf 54.00 242.49 Td (anywhere in this pipeline.) Tj ET
+BT /F1 9.50 Tf 54.00 224.95 Td (- Holds exactly only with consistent bamCoverage settings across all bigWigs in a) Tj ET
+BT /F1 9.50 Tf 68.00 212.41 Td (collection \(same --binSize, no sample-specific --ignoreForNormalization\).) Tj ET
+BT /F1 9.50 Tf 54.00 197.87 Td (- Raw integer counts can tie exactly; RPKM floats essentially never do - a negligible) Tj ET
+BT /F1 9.50 Tf 68.00 185.33 Td (tie-breaking difference in rank\(method='first'\), not a structural one.) Tj ET
+BT /F2 13.00 Tf 54.00 164.79 Td (4. Pipeline implementation) Tj ET
+BT /F3 8.30 Tf 64.00 140.89 Td (CREST-GV_vs_CHEERS/) Tj ET
+BT /F3 8.30 Tf 64.00 129.93 Td (  config.py                        # paths, collection map, trait map, tool paths) Tj ET
+BT /F3 8.30 Tf 64.00 118.98 Td (  scripts/) Tj ET
+BT /F3 8.30 Tf 64.00 108.02 Td (    build_consensus_peaks.py       # step A, per collection) Tj ET
+BT /F3 8.30 Tf 64.00 97.06 Td (    quantify_bigwigs.py            # step B, per collection) Tj ET
+BT /F3 8.30 Tf 64.00 86.11 Td (    run_collection.py              # orchestrates A -> D for one collection) Tj ET
+BT /F3 8.30 Tf 64.00 75.15 Td (    compare_with_crestgv.py        # joins CHEERS output vs CREST-GV per cell type) Tj ET
+
+endstream
+endobj
+8 0 obj
+<< /Length 5306 >>
+stream
+BT /F3 8.30 Tf 64.00 738.00 Td (  data/      consensus_peaks/, counts/<collection>/<cell_type>_ReadsInPeaks.txt) Tj ET
+BT /F3 8.30 Tf 64.00 727.04 Td (  results/   normalize/<collection>/..., enrichment/<collection>/<trait>/...,) Tj ET
+BT /F3 8.30 Tf 64.00 716.09 Td (             comparison/<collection>__<trait>.tsv, summary.tsv) Tj ET
+BT /F3 8.30 Tf 64.00 705.13 Td (  docs/      this report, interactive scatter-plot HTML) Tj ET
+BT /F1 9.50 Tf 54.00 688.18 Td (Step A \(build_consensus_peaks.py\) merges every cell type's peak BED file within a) Tj ET
+BT /F1 9.50 Tf 54.00 675.64 Td (collection via bedtools sort + merge into one non-overlapping consensus set, with a) Tj ET
+BT /F1 9.50 Tf 54.00 663.10 Td (unique peak ID added for bigWigAverageOverBed. Step B \(quantify_bigwigs.py\) runs) Tj ET
+BT /F1 9.50 Tf 54.00 650.56 Td (bigWigAverageOverBed for every cell type's bigWig against the consensus peaks and takes) Tj ET
+BT /F1 9.50 Tf 54.00 638.02 Td (the sum column \(total RPKM signal over the peak\). Steps C/D run the repository's) Tj ET
+BT /F1 9.50 Tf 54.00 625.48 Td (existing, unmodified CHEERS_normalize.py and CHEERS_computeEnrichment.py.) Tj ET
+BT /F1 9.50 Tf 54.00 607.94 Td (- awk and GNU parallel are not installed on this cluster; all text processing is done) Tj ET
+BT /F1 9.50 Tf 68.00 595.40 Td (in Python.) Tj ET
+BT /F1 9.50 Tf 54.00 580.86 Td (- bedtools and bigWigAverageOverBed are only available via module load; since Lmod's) Tj ET
+BT /F1 9.50 Tf 68.00 568.32 Td (module command is a shell function \(not visible to subprocess.run\), config.py) Tj ET
+BT /F1 9.50 Tf 68.00 555.78 Td (hardcodes resolved absolute binary paths instead.) Tj ET
+BT /F1 9.50 Tf 54.00 541.24 Td (- The system default python3 has a broken NumPy \(missing libblas.so.3\); config.py) Tj ET
+BT /F1 9.50 Tf 68.00 528.70 Td (resolves the python-cbrg module's interpreter plus its LD_LIBRARY_PATH and PYTHONPATH) Tj ET
+BT /F1 9.50 Tf 68.00 516.16 Td (explicitly for subprocess calls.) Tj ET
+BT /F2 13.00 Tf 54.00 495.62 Td (5. Results) Tj ET
+BT /F1 9.50 Tf 54.00 474.72 Td (The pipeline was run to completion on all 12 collections across all 4 traits \(48) Tj ET
+BT /F1 9.50 Tf 54.00 462.18 Td (collection/trait pairs, ~523 bigWigs\). All 48 pairs produced normalized specificity) Tj ET
+BT /F1 9.50 Tf 54.00 449.64 Td (scores and enrichment p-values; none failed.) Tj ET
+BT /F2 11.00 Tf 54.00 426.10 Td (5.1 A real bug found and fixed during QA: corrupted bigWigAverageOverBed) Tj ET
+BT /F2 11.00 Tf 54.00 411.80 Td (output) Tj ET
+BT /F1 9.50 Tf 54.00 393.50 Td (Every collection's raw quantified counts were scanned for implausible values before) Tj ET
+BT /F1 9.50 Tf 54.00 380.96 Td (trusting the results. This caught a genuine, reproducible bug: for greenleaf_brain,) Tj ET
+BT /F1 9.50 Tf 54.00 368.42 Td (bigWigAverageOverBed \(ucsctools v385\) returned a garbage sum value \(1.8783e+300, or) Tj ET
+BT /F1 9.50 Tf 54.00 355.88 Td (-5.8e+305 in one file\) for one specific peak \(chr1:248944146-248946588\) in 5 of its 20) Tj ET
+BT /F1 9.50 Tf 54.00 343.34 Td (bigWigs, instead of erroring.) Tj ET
+BT /F1 9.50 Tf 54.00 325.80 Td (That single corrupted value silently invalidated the ENTIRE collection's result:) Tj ET
+BT /F1 9.50 Tf 54.00 313.26 Td (normalize_counts\(\)'s library-size scaling and quantile_norm\(\)'s shared rank-value table) Tj ET
+BT /F1 9.50 Tf 54.00 300.72 Td (both pool across every peak and sample, so the contamination spread to all 20 cell) Tj ET
+BT /F1 9.50 Tf 54.00 288.18 Td (types; euclidean_norm\(\) then squared those now-astronomical values, overflowing to) Tj ET
+BT /F1 9.50 Tf 54.00 275.64 Td (infinity, and finite/infinity = 0.0 silently collapsed the entire 257,279-peak x) Tj ET
+BT /F1 9.50 Tf 54.00 263.10 Td (20-cell-type specificity matrix to zero - no exception was ever raised. Every peak tied) Tj ET
+BT /F1 9.50 Tf 54.00 250.56 Td (for rank 1, and every enrichment p-value for greenleaf_brain was degenerate, for all 4) Tj ET
+BT /F1 9.50 Tf 54.00 238.02 Td (traits.) Tj ET
+BT /F1 9.50 Tf 54.00 220.48 Td (Fix: quantify_bigwigs.py now rejects any bigWigAverageOverBed output that is negative,) Tj ET
+BT /F1 9.50 Tf 54.00 207.94 Td (non-finite, or exceeds a sanity ceiling \(1e9, far above the ~1e7 maximum legitimate) Tj ET
+BT /F1 9.50 Tf 54.00 195.40 Td (value observed across all 12 collections\), replacing it with 0.0 and logging a warning.) Tj ET
+BT /F1 9.50 Tf 54.00 182.86 Td (All other 11 collections were re-scanned for the same signature and found clean; only) Tj ET
+BT /F1 9.50 Tf 54.00 170.32 Td (greenleaf_brain was affected. After the fix, its specificity matrix shows 0% degenerate) Tj ET
+BT /F1 9.50 Tf 54.00 157.78 Td (rows and sensible enrichment p-values.) Tj ET
+BT /F2 11.00 Tf 54.00 134.24 Td (5.2 Overall concordance with CREST-GV) Tj ET
+BT /F1 9.50 Tf 54.00 115.94 Td (CHEERS's output was compared against CREST-GV's own CREST-GV_pval_norm column, not the) Tj ET
+BT /F1 9.50 Tf 54.00 103.40 Td (raw CREST-GV_pval, via Spearman rank correlation \(rho\), per collection/trait pair,) Tj ET
+BT /F1 9.50 Tf 54.00 90.86 Td (across 48 pairs. CREST-GV computes CREST-GV_pval_norm as norm.sf\(Z_norm\), where) Tj ET
+BT /F1 9.50 Tf 54.00 78.32 Td (Z_norm=\(Z-mean\(Z\)\)/std\(Z\) is re-standardized across all cell types WITHIN one collection) Tj ET
+
+endstream
+endobj
+9 0 obj
+<< /Length 5569 >>
+stream
+BT /F1 9.50 Tf 54.00 738.00 Td (\(crestgv.py, __add_statistics\(\)\). This re-standardization is what makes the statistic) Tj ET
+BT /F1 9.50 Tf 54.00 725.46 Td (comparable across collections of very different size and composition - the raw CREST-) Tj ET
+BT /F1 9.50 Tf 54.00 712.92 Td (GV_pval is calibrated only against a trait-independent, genome-wide background rate and) Tj ET
+BT /F1 9.50 Tf 54.00 700.38 Td (does not correct for collection-specific scale differences, so CREST-GV_pval_norm is the) Tj ET
+BT /F1 9.50 Tf 54.00 687.84 Td (column its own implementation intends for this kind of comparison. Median rho = 0.594,) Tj ET
+BT /F1 9.50 Tf 54.00 675.30 Td (mean rho = 0.552.) Tj ET
+BT /F2 8.30 Tf 64.00 654.76 Td (Trait                 | Median rho | Range         ) Tj ET
+BT /F1 8.30 Tf 64.00 643.80 Td (----------------------+------------+---------------) Tj ET
+BT /F1 8.30 Tf 64.00 632.85 Td (Type 1 diabetes       | 0.706      | 0.343 - 0.933 ) Tj ET
+BT /F1 8.30 Tf 64.00 621.89 Td (Red blood cell traits | 0.594      | -0.143 - 1.000) Tj ET
+BT /F1 8.30 Tf 64.00 610.94 Td (Heart rate            | 0.513      | -0.190 - 0.907) Tj ET
+BT /F1 8.30 Tf 64.00 599.98 Td (Type 2 diabetes       | 0.502      | 0.036 - 1.000 ) Tj ET
+BT /F2 8.30 Tf 64.00 580.02 Td (Collection      | Median rho | Collection              | Median rho) Tj ET
+BT /F1 8.30 Tf 64.00 569.07 Td (----------------+------------+-------------------------+-----------) Tj ET
+BT /F1 8.30 Tf 64.00 558.11 Td (catlas_adult    | 0.785      | super_pbmc              | 0.444     ) Tj ET
+BT /F1 8.30 Tf 64.00 547.16 Td (cad             | 0.761      | erythoid_d7_d10_d13_d17 | 0.420     ) Tj ET
+BT /F1 8.30 Tf 64.00 536.20 Td (greenleaf_brain | 0.751      | pancreatic_pbmc         | 0.358     ) Tj ET
+BT /F1 8.30 Tf 64.00 525.24 Td (catlas_fetal    | 0.746      | calderon                | 0.122     ) Tj ET
+BT /F1 8.30 Tf 64.00 514.29 Td (h1_hescs        | 0.700      | ludwig2019              | 0.024     ) Tj ET
+BT /F1 8.30 Tf 64.00 503.33 Td (immune_cell     | 0.567      | mpal                    | 0.525     ) Tj ET
+BT /F1 9.50 Tf 54.00 486.38 Td (Caveat on raw significance counts: counting cell types 'significant' at p<0.05 is) Tj ET
+BT /F1 9.50 Tf 54.00 473.84 Td (lopsided and should NOT be read as a concordance metric - CHEERS flags 1,314 cell types) Tj ET
+BT /F1 9.50 Tf 54.00 461.30 Td (significant across all pairs, CREST-GV's normalized statistic flags only 78 \(71) Tj ET
+BT /F1 9.50 Tf 54.00 448.76 Td (overlapping\). This is not CHEERS finding more real signal; its raw p-value has no cross-) Tj ET
+BT /F1 9.50 Tf 54.00 436.22 Td (collection calibration and underflows toward 0 very easily in large, strongly-enriched) Tj ET
+BT /F1 9.50 Tf 54.00 423.68 Td (collections \(Section 5.4\). Rank correlation \(rho\), not the significance count, is the) Tj ET
+BT /F1 9.50 Tf 54.00 411.14 Td (concordance metric used throughout.) Tj ET
+BT /F2 11.00 Tf 54.00 387.60 Td (5.3 Biological validation: top enriched cell types per trait) Tj ET
+BT /F1 9.50 Tf 54.00 369.30 Td (As an independent face-validity check, CHEERS's own top hits per trait, ranked by) Tj ET
+BT /F1 9.50 Tf 54.00 356.76 Td (Z-score across all 12 collections, recover the expected biology in every case:) Tj ET
+BT /F1 9.50 Tf 54.00 339.22 Td (- Type 1 diabetes: T lymphocytes \(CD4+/CD8+\), thymocytes, cytotoxic T, macrophages -) Tj ET
+BT /F1 9.50 Tf 68.00 326.68 Td (consistent with T1D's T-cell-mediated autoimmune pathology.) Tj ET
+BT /F1 9.50 Tf 54.00 312.14 Td (- Type 2 diabetes: pancreatic acinar, hepatoblast, skeletal myocytes \(type I/II\),) Tj ET
+BT /F1 9.50 Tf 68.00 299.60 Td (adipocyte - metabolic/insulin-resistance tissues, not immune cells.) Tj ET
+BT /F1 9.50 Tf 54.00 285.06 Td (- Red blood cell traits: erythroblasts \(stages 1-4\), megakaryocyte - directly the) Tj ET
+BT /F1 9.50 Tf 68.00 272.52 Td (erythroid lineage \(Z up to 73, the strongest signal of all 4 traits\).) Tj ET
+BT /F1 9.50 Tf 54.00 257.98 Td (- Heart rate: atrial and ventricular cardiomyocytes, vascular smooth muscle,) Tj ET
+BT /F1 9.50 Tf 68.00 245.44 Td (endothelial - cardiac tissue, as expected.) Tj ET
+BT /F2 11.00 Tf 54.00 224.90 Td (5.4 A statistical caveat for small collections) Tj ET
+BT /F1 9.50 Tf 54.00 206.60 Td (Four collections have few enough cell types that their individual Spearman rho should) Tj ET
+BT /F1 9.50 Tf 54.00 194.06 Td (not be over-interpreted: h1_hescs \(n=4\), ludwig2019 \(n=8\), CAD \(n=10\), pancreatic_pbmc) Tj ET
+BT /F1 9.50 Tf 54.00 181.52 Td (\(n=12\). Checking significance of the correlation itself makes this concrete: NONE of) Tj ET
+BT /F1 9.50 Tf 54.00 168.98 Td (ludwig2019's four correlations are statistically significant \(p=0.207, 0.651, 0.736,) Tj ET
+BT /F1 9.50 Tf 54.00 156.44 Td (0.651\) - with only 8 cell types, a Spearman rho anywhere in a wide range around zero is) Tj ET
+BT /F1 9.50 Tf 54.00 143.90 Td (indistinguishable from noise.) Tj ET
+BT /F1 9.50 Tf 54.00 126.36 Td (A numerical quirk worth documenting: h1_hescs \(n=4\) shows two PERFECT correlations) Tj ET
+BT /F1 9.50 Tf 54.00 113.82 Td (\(rho=1.0 for type 2 diabetes and red blood cell traits\). SciPy's spearmanr reports) Tj ET
+BT /F1 9.50 Tf 54.00 101.28 Td (pvalue=0.0 for these, but that is a known breakdown of its t-distribution approximation) Tj ET
+BT /F1 9.50 Tf 54.00 88.74 Td (at |rho|=1 \(division by zero\), not the correct value. Brute-force enumeration of all 4!) Tj ET
+BT /F1 9.50 Tf 54.00 76.20 Td (= 24 rank permutations for n=4 gives the true exact two-sided p-value as 2/24 = 0.083 -) Tj ET
+
+endstream
+endobj
+10 0 obj
+<< /Length 5790 >>
+stream
+BT /F1 9.50 Tf 54.00 738.00 Td (not significant at the conventional 0.05 threshold, despite being the best possible) Tj ET
+BT /F1 9.50 Tf 54.00 725.46 Td (outcome achievable with only 4 data points. No individual rho from a collection with) Tj ET
+BT /F1 9.50 Tf 54.00 712.92 Td (n<12 or so should be read as evidence of agreement or disagreement on its own; the) Tj ET
+BT /F1 9.50 Tf 54.00 700.38 Td (larger collections \(n=15-175\) carry the real statistical weight in Section 5.2.) Tj ET
+BT /F2 11.00 Tf 54.00 676.84 Td (5.5 Case study: calderon's near-zero correlation \(median rho=0.122\)) Tj ET
+BT /F1 9.50 Tf 54.00 658.54 Td (Unlike the small-collection cases above, calderon \(n=175, among the largest collections\)) Tj ET
+BT /F1 9.50 Tf 54.00 646.00 Td (has a robust, well-powered near-zero correlation for 2 of its 4 traits that is not a) Tj ET
+BT /F1 9.50 Tf 54.00 633.46 Td (statistical-power artifact.) Tj ET
+BT /F1 9.50 Tf 54.00 615.92 Td (Structure: calderon's 175 bigWigs are not 175 distinct biological cell types - they are) Tj ET
+BT /F1 9.50 Tf 54.00 603.38 Td (45 distinct cell-type/stimulation conditions, each replicated across ~4 donors \(e.g.) Tj ET
+BT /F1 9.50 Tf 54.00 590.84 Td (1001-Th1_precursors-S, 1002-Th1_precursors-S, 1004-..., 1008-...\). This is the Soskic et) Tj ET
+BT /F1 9.50 Tf 54.00 578.30 Td (al. \(2019\) T-cell dataset CHEERS was originally validated on \(the same 45 condition) Tj ET
+BT /F1 9.50 Tf 54.00 565.76 Td (names ship as test_input/ elsewhere in this repository, donor-pooled\); CREST-GV's) Tj ET
+BT /F1 9.50 Tf 54.00 553.22 Td (collection instead keeps every donor's bigWig and peak calls unaggregated.) Tj ET
+BT /F1 9.50 Tf 54.00 535.68 Td (Both methods are substantially donor-noise-dominated in this collection \(variance) Tj ET
+BT /F1 9.50 Tf 54.00 523.14 Td (decomposition: within-base-cell-type / total, across the 4 donor replicates of each of) Tj ET
+BT /F1 9.50 Tf 54.00 510.60 Td (the 45 conditions\):) Tj ET
+BT /F2 8.30 Tf 64.00 490.06 Td (Trait                 | CHEERS donor-noise var. | CREST-GV donor-noise var. | Observed rho) Tj ET
+BT /F1 8.30 Tf 64.00 479.10 Td (----------------------+-------------------------+---------------------------+-------------) Tj ET
+BT /F1 8.30 Tf 64.00 468.15 Td (Type 1 diabetes       | 13.2%                   | 39.4%                     | 0.673       ) Tj ET
+BT /F1 8.30 Tf 64.00 457.19 Td (Heart rate            | 39.1%                   | 49.9%                     | 0.206       ) Tj ET
+BT /F1 8.30 Tf 64.00 446.24 Td (Type 2 diabetes       | 43.4%                   | 57.4%                     | 0.036       ) Tj ET
+BT /F1 8.30 Tf 64.00 435.28 Td (Red blood cell traits | 45.1%                   | 61.7%                     | 0.037       ) Tj ET
+BT /F1 9.50 Tf 54.00 418.32 Td (Correlating two independently noisy measurements is mathematically attenuated by the) Tj ET
+BT /F1 9.50 Tf 54.00 405.78 Td (product of their noise fractions \(observable-correlation ceiling approximately) Tj ET
+BT /F1 9.50 Tf 54.00 393.24 Td (sqrt\(\(1-w_cheers\)*\(1-w_crestgv\)\)\). Donor noise alone predicts a ceiling of about 0.73) Tj ET
+BT /F1 9.50 Tf 54.00 380.70 Td (for type 1 diabetes \(observed: 0.673 - right at the ceiling\), but only about 0.49 and) Tj ET
+BT /F1 9.50 Tf 54.00 368.16 Td (0.46 for type 2 diabetes and red blood cell traits - yet their observed rho \(0.036,) Tj ET
+BT /F1 9.50 Tf 54.00 355.62 Td (0.037\) sits far BELOW even that reduced ceiling. Donor noise alone does not fully) Tj ET
+BT /F1 9.50 Tf 54.00 343.08 Td (explain those two.) Tj ET
+BT /F1 9.50 Tf 54.00 325.54 Td (The remaining gap has a biological explanation. calderon is a T-cell/PBMC collection.) Tj ET
+BT /F1 9.50 Tf 54.00 313.00 Td (Type 1 diabetes is T-cell-mediated autoimmune disease - a direct biological match, so) Tj ET
+BT /F1 9.50 Tf 54.00 300.46 Td (both methods detect real, concordant signal despite the noise. Type 2 diabetes) Tj ET
+BT /F1 9.50 Tf 54.00 287.92 Td (\(pancreas/liver/muscle/fat\) and red blood cell traits \(erythroid lineage\) are not) Tj ET
+BT /F1 9.50 Tf 54.00 275.38 Td (primarily mediated through T cells at all - there is effectively no true enrichment) Tj ET
+BT /F1 9.50 Tf 54.00 262.84 Td (signal for either method to find in a T-cell-only collection for those two traits. Under) Tj ET
+BT /F1 9.50 Tf 54.00 250.30 Td (a near-null signal, two different statistical tests' rankings are expected to show close) Tj ET
+BT /F1 9.50 Tf 54.00 237.76 Td (to zero correlation purely by chance, exactly as observed.) Tj ET
+BT /F1 9.50 Tf 54.00 220.22 Td (Net conclusion: calderon's low correlation is not a flaw in either tool. It reflects \(1\)) Tj ET
+BT /F1 9.50 Tf 54.00 207.68 Td (donor-replicate noise diluting an otherwise-real signal for type 1 diabetes, compounded) Tj ET
+BT /F1 9.50 Tf 54.00 195.14 Td (by \(2\) a genuine absence of true signal, for either method, on traits this T-cell) Tj ET
+BT /F1 9.50 Tf 54.00 182.60 Td (collection was never going to be informative for. \(A direct confirmatory re-run on) Tj ET
+BT /F1 9.50 Tf 54.00 170.06 Td (donor-pooled calderon counts was considered but judged unnecessary to support this) Tj ET
+BT /F1 9.50 Tf 54.00 157.52 Td (conclusion, which is already supported by the variance decomposition and the trait-) Tj ET
+BT /F1 9.50 Tf 54.00 144.98 Td (specific biological pattern.\)) Tj ET
+BT /F2 11.00 Tf 54.00 121.44 Td (5.6 Interactive visualization) Tj ET
+BT /F1 9.50 Tf 54.00 103.14 Td (A per-collection, per-trait scatter-plot comparison \(CHEERS vs CREST-GV, toggleable) Tj ET
+BT /F1 9.50 Tf 54.00 90.60 Td (between Z-score and raw p-value views, colored by significance status in each tool\) is) Tj ET
+BT /F1 9.50 Tf 54.00 78.06 Td (available at CREST-GV_vs_CHEERS/docs/cheers_vs_crestgv_scatter.html \(self-contained,) Tj ET
+
+endstream
+endobj
+11 0 obj
+<< /Length 5219 >>
+stream
+BT /F1 9.50 Tf 54.00 738.00 Td (opens in any browser, no server required\). Each subplot's axes are scaled independently,) Tj ET
+BT /F1 9.50 Tf 54.00 725.46 Td (since CHEERS's Z-score is unbounded \(reaching into the tens or hundreds for very strong) Tj ET
+BT /F1 9.50 Tf 54.00 712.92 Td (signals, e.g. Z~73 for erythroblasts/red blood cell traits\) while CREST-GV's norm) Tj ET
+BT /F1 9.50 Tf 54.00 700.38 Td (statistic is standardized to roughly [-3, 3] by construction - panels should be read for) Tj ET
+BT /F1 9.50 Tf 54.00 687.84 Td (rank/pattern, not absolute axis position.) Tj ET
+BT /F2 13.00 Tf 54.00 664.30 Td (6. Conceptual differences between the two methods) Tj ET
+BT /F1 9.50 Tf 54.00 643.40 Td (Reading CREST-GV's own implementation \(crestgv/crestgv.py\) clarifies that CHEERS and) Tj ET
+BT /F1 9.50 Tf 54.00 630.86 Td (CREST-GV are not two statistics answering the same question - this matters for) Tj ET
+BT /F1 9.50 Tf 54.00 618.32 Td (interpreting both the agreement and the disagreement above.) Tj ET
+BT /F1 9.50 Tf 54.00 600.78 Td (- CHEERS asks whether a GWAS SNP sits in chromatin that is) Tj ET
+BT /F1 9.50 Tf 68.00 588.24 Td (specifically/disproportionately accessible in one cell type relative to all others in) Tj ET
+BT /F1 9.50 Tf 68.00 575.70 Td (the collection. It requires one shared consensus peak set across all cell types) Tj ET
+BT /F1 9.50 Tf 68.00 563.16 Td (\(built by this pipeline, since CREST-GV's collections provide independently-called) Tj ET
+BT /F1 9.50 Tf 68.00 550.62 Td (peaks per cell type\) and ranks peaks by a continuous, Euclidean-normalized) Tj ET
+BT /F1 9.50 Tf 68.00 538.08 Td (specificity score.) Tj ET
+BT /F1 9.50 Tf 54.00 523.54 Td (- CREST-GV asks whether a cell type's overall accessible genome is enriched for trait) Tj ET
+BT /F1 9.50 Tf 68.00 511.00 Td (SNPs relative to a genome-wide background rate \(the fraction of 1000 Genomes common) Tj ET
+BT /F1 9.50 Tf 68.00 498.46 Td (variants falling in that cell type's own peaks\). It is a binary peak-overlap) Tj ET
+BT /F1 9.50 Tf 68.00 485.92 Td (proportion Z-test, computed independently per cell type against that cell type's own) Tj ET
+BT /F1 9.50 Tf 68.00 473.38 Td (native peak calls - it does not use bigWig signal strength in the statistic at all,) Tj ET
+BT /F1 9.50 Tf 68.00 460.84 Td (and carries no relative-specificity weighting between cell types.) Tj ET
+BT /F1 9.50 Tf 54.00 446.30 Td (Two consequences follow. First, a locus accessible in every cell type contributes) Tj ET
+BT /F1 9.50 Tf 54.00 433.76 Td (equally to every cell type's CREST-GV statistic, but is down-weighted by CHEERS's) Tj ET
+BT /F1 9.50 Tf 54.00 421.22 Td (specificity ranking - so some disagreement reflects this genuine conceptual difference,) Tj ET
+BT /F1 9.50 Tf 54.00 408.68 Td (not error in either. Second, because CHEERS requires a shared peak space, this) Tj ET
+BT /F1 9.50 Tf 54.00 396.14 Td (pipeline's consensus-merge step means CHEERS and CREST-GV are not even evaluated against) Tj ET
+BT /F1 9.50 Tf 54.00 383.60 Td (literally identical peak coordinates within a 'matched' collection - a further expected) Tj ET
+BT /F1 9.50 Tf 54.00 371.06 Td (source of difference, independent of the statistical model.) Tj ET
+BT /F1 9.50 Tf 54.00 353.52 Td (A review of CREST-GV's source code surfaced several hardening opportunities \(a stale) Tj ET
+BT /F1 9.50 Tf 54.00 340.98 Td (CLI/class parameter mismatch, division-by-zero risks in SE and Z_norm analogous to the) Tj ET
+BT /F1 9.50 Tf 54.00 328.44 Td (bigWigAverageOverBed failure mode found in Section 5.1, and the exact-binomial pmf/sf) Tj ET
+BT /F1 9.50 Tf 54.00 315.90 Td (columns underflowing to exactly 0.0 for strong signals\) - tracked separately in CREST-) Tj ET
+BT /F1 9.50 Tf 54.00 303.36 Td (GV/KNOWN_ISSUES.md and orthogonal to the comparison results above, which use CREST-GV's) Tj ET
+BT /F1 9.50 Tf 54.00 290.82 Td (already-computed, supported output columns \(CREST-GV_pval, CREST-GV_pval_norm\).) Tj ET
+BT /F2 13.00 Tf 54.00 267.28 Td (7. Conclusion) Tj ET
+BT /F1 9.50 Tf 54.00 246.38 Td (CHEERS and CREST-GV show positive, generally moderate-to-strong rank concordance \(median) Tj ET
+BT /F1 9.50 Tf 54.00 233.84 Td (rho=0.594 across 48 well-defined collection/trait pairs\) on cell types they both) Tj ET
+BT /F1 9.50 Tf 54.00 221.30 Td (identify as most relevant to a trait, and both independently recover biologically) Tj ET
+BT /F1 9.50 Tf 54.00 208.76 Td (expected top hits per trait \(Section 5.3\). Where they diverge strongly, the divergence) Tj ET
+BT /F1 9.50 Tf 54.00 196.22 Td (is explainable: either the collection is too small to measure concordance reliably at) Tj ET
+BT /F1 9.50 Tf 54.00 183.68 Td (all \(Section 5.4\), or - as in calderon - a combination of unaggregated biological-) Tj ET
+BT /F1 9.50 Tf 54.00 171.14 Td (replicate noise and genuine absence of trait-relevant signal in that specific reference) Tj ET
+BT /F1 9.50 Tf 54.00 158.60 Td (collection \(Section 5.5\). Neither pattern indicates a defect in either method; together) Tj ET
+BT /F1 9.50 Tf 54.00 146.06 Td (with the conceptual differences in Section 6, they explain the full range of agreement) Tj ET
+BT /F1 9.50 Tf 54.00 133.52 Td (and disagreement observed.) Tj ET
+
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 6 0 R >>
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 7 0 R >>
+endobj
+14 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 8 0 R >>
+endobj
+15 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 9 0 R >>
+endobj
+16 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 10 0 R >>
+endobj
+17 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 11 0 R >>
+endobj
+xref
+0 18
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000151 00000 n 
+0000000219 00000 n 
+0000000292 00000 n 
+0000000368 00000 n 
+0000004741 00000 n 
+0000009630 00000 n 
+0000014988 00000 n 
+0000020609 00000 n 
+0000026452 00000 n 
+0000031724 00000 n 
+0000031871 00000 n 
+0000032018 00000 n 
+0000032165 00000 n 
+0000032312 00000 n 
+0000032460 00000 n 
+trailer
+<< /Size 18 /Root 1 0 R >>
+startxref
+32608
+%%EOF
