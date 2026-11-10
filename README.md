@@ -57,6 +57,10 @@ caller of your choice, as long as each peak file is a plain tab-separated
 
 ## How to use CREST-GV
 
+See [`examples/quickstart.ipynb`](examples/quickstart.ipynb) for a runnable,
+end-to-end walkthrough (enrichment scoring, reading the output, ranking cell types,
+per-variant coverage) against the bundled example data.
+
 ### As a library
 
 ```python
