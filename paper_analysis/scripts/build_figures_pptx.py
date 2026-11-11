@@ -1,16 +1,22 @@
-"""Assemble the main manuscript figures (Fig. 1-5) into a single PowerPoint deck,
-one A4-landscape slide per figure, with the already-generated panel image (which
-already contains all of that figure's subfigures, laid out by matplotlib) plus
-its full legend text as a caption below.
+"""Assemble the main manuscript figures (Fig. 1-2) into a single PowerPoint deck,
+one A4-landscape slide per source image, with the already-generated panel image
+(which already contains all of that image's subfigures, laid out by matplotlib)
+plus the corresponding slice of its legend text as a caption below.
 
-Fig. 1 has no slide image yet -- it depicts the web application and a framework
-diagram, neither of which exists as a generated asset in this repo. Its slide
-carries a placeholder note plus the legend text, so the layout is ready to
-receive the image once it exists.
+Fig. 1 (5 panels, a-e) and Fig. 2 (6 panels, a-f) are each merges of what used
+to be several separate figures; the underlying image files are unchanged, so
+each still gets its own slide, labelled with just the panel letters it covers
+(e.g. "Figure 1 (c-d)") rather than one slide per figure number.
+
+Fig. 1a-b has no slide image yet -- it depicts the web application and a
+framework diagram as a placeholder screenshot montage (framework diagram
+doesn't exist as an asset at all). Its slide carries the placeholder image
+that is available plus the legend text, so the layout is ready to receive the
+final artwork once it exists.
 
 Legend text here is a plain-text transcription of the legends in
-crest-gv_nature_methods.tex's "Figure legends" section (kept in sync by hand --
-there are only 5 of them).
+MANUSCRIPT.tex's "Figure legends" section (kept in sync by hand -- there are
+only 2 of them).
 
 Run from the repo root:
     python scripts/build_figures_pptx.py
@@ -37,10 +43,11 @@ INK = RGBColor(0x1A, 0x1A, 0x1A)
 FIGURES = [
     {
         "num": 1,
-        "title": "Figure 1",
-        "image": None,
+        "title": "Figure 1 (a-b)",
+        "image": os.path.join(ROOT, "figures", "WEB_crestgv_overview.png"),
         "legend": (
-            "Fig. 1 | Overview of CREST-GV. "
+            "Fig. 1 | Overview and standardisation of CREST-GV enrichment scores "
+            "(panel b is a placeholder figure). "
             "a, Enrichment framework. Trait-associated variants (GWAS lead variants and LD "
             "proxies, or a user-provided variant set) and background variants (1000 Genomes "
             "Project) are intersected with the open chromatin regions of each cell type in the "
@@ -50,62 +57,61 @@ FIGURES = [
             "right-tailed P-value. "
             "b, The CREST-GV web application, providing access to precomputed results for "
             "1,125 GWAS traits and analysis of user-provided variant sets and chromatin "
-            "accessibility collections."
+            "accessibility collections. (Continues as Fig. 1c-e over the next two slides.)"
         ),
         "placeholder": "Image not yet available -- requires the web application screenshot "
                         "and framework diagram (external assets, not generated in paper_analysis).",
     },
     {
-        "num": 2,
-        "title": "Figure 2",
+        "num": 1,
+        "title": "Figure 1 (c-d)",
         "image": os.path.join(FIG_DIR, "Fig2_standardisation.png"),
         "legend": (
-            "Fig. 2 | Cross-collection standardisation of enrichment scores. "
-            "a, Distributions of raw enrichment scores (Z) for each chromatin accessibility "
+            "c, Distributions of raw enrichment scores (Z) for each chromatin accessibility "
             "collection, showing collection-specific differences in scale, for red blood cell "
             "traits (one of the four traits highlighted in Results; chosen for consistency with "
-            "Figs. 3-4, which use the same four traits). "
-            "b, Distributions of standardised enrichment scores (Z̃) after within-collection "
+            "panel e and Fig. 2, which use the same four traits). "
+            "d, Distributions of standardised enrichment scores (Z̃) after within-collection "
             "standardisation, same trait and cell types."
         ),
     },
     {
-        "num": 3,
-        "title": "Figure 3",
+        "num": 1,
+        "title": "Figure 1 (e)",
         "image": os.path.join(FIG_DIR, "Fig3_cross_trait_heatmap.png"),
         "legend": (
-            "Fig. 3 | CREST-GV enrichment across four GWAS traits. "
-            "Standardised CREST-GV enrichment scores (Z̃) for the cell types significantly "
-            "enriched (Benjamini-Hochberg FDR q < 0.10) in at least one of heart rate, red blood "
-            "cell traits, type 1 diabetes and type 2 diabetes. Rows are grouped by the trait in "
-            "which each cell type is significant; values in each cell give the standardised "
-            "score of that cell type for every trait."
+            "e, CREST-GV enrichment across four GWAS traits: standardised CREST-GV "
+            "enrichment scores (Z̃) for the top 10 cell types by score for each of heart rate, "
+            "red blood cell traits, type 1 diabetes and type 2 diabetes (union across the four "
+            "traits, not restricted to significance). Rows are grouped by the trait each cell "
+            "type scores highest for; values in each cell give the standardised score of that "
+            "cell type for every trait; asterisks mark Benjamini-Hochberg FDR q < 0.10 "
+            "significance."
         ),
     },
     {
-        "num": 4,
-        "title": "Figure 4",
+        "num": 2,
+        "title": "Figure 2 (a-d)",
         "image": os.path.join(FIG_DIR, "Fig4_per_trait_rankings.png"),
         "legend": (
-            "Fig. 4 | Cell type rankings for the four GWAS traits. "
+            "Fig. 2 | Cell type rankings and analysis of user-provided data with CREST-GV. "
             "Top and bottom 10 standardised enrichment scores (Z̃) across all collections for "
             "a, heart rate; b, red blood cell traits; c, type 1 diabetes; and d, type 2 diabetes. "
             "Bars are coloured by sign; asterisks mark cell types with Benjamini-Hochberg "
-            "FDR q < 0.10."
+            "FDR q < 0.10. (Continues as Fig. 2e-f on the next slide.)"
         ),
     },
     {
-        "num": 5,
-        "title": "Figure 5",
+        "num": 2,
+        "title": "Figure 2 (e-f)",
         "image": os.path.join(FIG_DIR, "Fig5_upload_example.png"),
         "legend": (
-            "Fig. 5 | Analysis of user-provided data with CREST-GV. "
-            "a, Held-out collection re-upload: the cad collection re-analysed through the "
+            "e, Held-out collection re-upload: the cad collection re-analysed through the "
             "in-house-collection code path (same bigWig tracks and peak calls, processed as if "
             "newly uploaded), compared against its precomputed reference-atlas enrichment score "
             "for platelet_measurement. Dashed line, y = x; each point is one of the ten cad cell "
             "types. "
-            "b, User-provided variant set: a GWAS trait not among the four traits highlighted in "
+            "f, User-provided variant set: a GWAS trait not among the four traits highlighted in "
             "Results (osteoporosis), run fresh against all 11 reference collections; top 10 "
             "standardised scores shown."
         ),
