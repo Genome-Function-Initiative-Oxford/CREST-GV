@@ -20,10 +20,10 @@ null_calibration/  null calibration (random genome-wide variant sets) -- see its
 
 | Script | Manuscript item | What it shows |
 |---|---|---|
-| `fig2_standardisation.py` | Fig. 2 | Raw ($Z_{ij}$) vs standardised ($\tilde{Z}_{ij}$) score distributions per collection, for red_blood_cell_traits |
-| `fig3_cross_trait_heatmap.py` | Fig. 3 | Standardised scores for the cell types significant (Benjamini-Hochberg FDR q<0.10) in >=1 of the 4 highlighted traits (6 cell types) |
-| `fig4_per_trait_rankings.py` | Fig. 4 | Top/bottom 10 standardised scores per trait, 4 panels, FDR-significant hits marked |
-| `fig5_upload_example.py` | Fig. 5 | **(a)** The `cad` collection re-analysed via the in-house-upload code path, compared to its precomputed atlas result — concordance is near-exact (differences ~1e-13, floating-point noise only). **(b)** A trait not among the four highlighted in Results (`osteoporosis`) run fresh against all 11 collections, exactly as a first-time upload would be processed. Run times reported for both. |
+| `fig2_standardisation.py` | Fig. 1c-d | Raw ($Z_{ij}$) vs standardised ($\tilde{Z}_{ij}$) score distributions per collection, for red_blood_cell_traits |
+| `fig3_cross_trait_heatmap.py` | Fig. 1e | Standardised scores for the top 10 cell types per trait by score (union across the 4 highlighted traits, not restricted to significance; 36 cell types), asterisks mark Benjamini-Hochberg FDR q<0.10 |
+| `fig4_per_trait_rankings.py` | Fig. 2a-d | Top/bottom 10 standardised scores per trait, 4 panels, FDR-significant hits marked |
+| `fig5_upload_example.py` | Fig. 2e-f | **(e)** The `cad` collection re-analysed via the in-house-upload code path, compared to its precomputed atlas result — concordance is near-exact (differences ~1e-13, floating-point noise only). **(f)** A trait not among the four highlighted in Results (`osteoporosis`) run fresh against all 11 collections, exactly as a first-time upload would be processed. Run times reported for both. |
 | `suppfig_qc_distributions.py` | Supp. Fig. 1 | QC prediction-score histogram with Good/Decent/Bad thresholds shaded |
 | `suppfig_cheers_scatter.py` | Supp. Fig. 3 | CHEERS-vs-CREST-GV concordance scatter, per collection and pooled |
 | `null_calibration_analyze.py` | Supp. Fig. 2 | Null calibration QQ-plot and empirical-FPR-vs-nominal summary (see `null_calibration/README.md`) |

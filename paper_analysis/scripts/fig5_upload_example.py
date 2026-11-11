@@ -1,15 +1,15 @@
-"""Fig. 5 -- Analysis of user-provided data with CREST-GV.
+"""Fig. 2e-f -- Analysis of user-provided data with CREST-GV.
 
 Two worked examples, run with the refactored package (this repo's own
 src/crestgv), not the precomputed resource:
 
-(a) Held-out collection re-upload: the `cad` collection re-analysed via the
+(e) Held-out collection re-upload: the `cad` collection re-analysed via the
     in-house-collection code path (same bigwigs/peaks, accessed as if a user
     had uploaded them), compared against its precomputed reference-atlas
     result for the same trait (platelet_measurement). Demonstrates that an
     uploaded collection reproduces the atlas result and can be ranked
     alongside it.
-(b) User-provided variant set: a GWAS trait not among the four highlighted in
+(f) User-provided variant set: a GWAS trait not among the four highlighted in
     the main Results (osteoporosis), run fresh against all 11 reference
     collections, exactly as a first-time user upload would be processed.
 
@@ -109,7 +109,7 @@ def main():
                      fontsize=7, xytext=(4, 4), textcoords="offset points")
     ax1.set_xlabel("Reference-atlas raw Z (precomputed)")
     ax1.set_ylabel("Re-uploaded raw Z (this run)")
-    ax1.set_title(f"a   Held-out collection re-upload (cad, {PANEL_A_TRAIT})\nrun time: {runtime_a:.1f}s", loc="left", fontsize=10)
+    ax1.set_title(f"e   Held-out collection re-upload (cad, {PANEL_A_TRAIT})\nrun time: {runtime_a:.1f}s", loc="left", fontsize=10)
 
     # Panel b: top 10 for the fresh user-trait run
     top10 = ranked_b.head(10)[::-1]
@@ -119,7 +119,7 @@ def main():
     ax2.set_yticklabels(top10.index, fontsize=8)
     ax2.axvline(0, color=GRIDLINE, linewidth=1)
     ax2.set_xlabel(r"$\tilde{Z}$ (this run)")
-    ax2.set_title(f"b   User-provided variant set ({PANEL_B_TRAIT})\ntop 10 of fresh 11-collection run, run time: {runtime_b:.1f}s", loc="left", fontsize=10)
+    ax2.set_title(f"f   User-provided variant set ({PANEL_B_TRAIT})\ntop 10 of fresh 11-collection run, run time: {runtime_b:.1f}s", loc="left", fontsize=10)
 
     fig.tight_layout()
     out_base = os.path.join(ROOT, "figures", "Fig5_upload_example")

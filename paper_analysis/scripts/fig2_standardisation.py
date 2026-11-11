@@ -1,12 +1,12 @@
-"""Fig. 2 -- Cross-collection standardisation of enrichment scores.
+"""Fig. 1c-d -- Cross-collection standardisation of enrichment scores.
 
-(a) Raw Z_ij per collection, for the cell types retained after QC.
-(b) Standardised Z-tilde_ij (same cell types), after within-collection
+(c) Raw Z_ij per collection, for the cell types retained after QC.
+(d) Standardised Z-tilde_ij (same cell types), after within-collection
     standardisation.
 
 Trait shown: red_blood_cell_traits (one of the four traits highlighted in the
-Results; chosen here for consistency with Figs. 3-4, which use the same four
-traits).
+Results; chosen here for consistency with Fig. 1e and Fig. 2, which use the
+same four traits).
 
 Run from the repo root:
     python scripts/fig2_standardisation.py
@@ -61,8 +61,8 @@ def main():
     positions = range(1, len(COLLECTIONS) + 1)
 
     for ax, data, color, title in [
-        (ax1, raw_by_collection, SERIES_1, "a   Raw enrichment score ($Z_{ij}$)"),
-        (ax2, norm_by_collection, SERIES_2, r"b   Standardised score ($\tilde{Z}_{ij}$)"),
+        (ax1, raw_by_collection, SERIES_1, "c   Raw enrichment score ($Z_{ij}$)"),
+        (ax2, norm_by_collection, SERIES_2, r"d   Standardised score ($\tilde{Z}_{ij}$)"),
     ]:
         bp = ax.boxplot(
             data, positions=positions, widths=0.6, patch_artist=True, showfliers=True,
