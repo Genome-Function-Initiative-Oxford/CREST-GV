@@ -14,26 +14,12 @@ The only mandatory input is a genetic variant file in the format described in
 
 ## Installation
 
-### From PyPI (recommended)
+CREST-GV is not yet published on PyPI; install it from source for now.
 
-```bash
-pip install crestgv
-```
+### Conda/mamba environment (recommended)
 
-This installs the `crestgv` Python package and the `crestgv` command-line tool.
-`pyBigWig` and `pyranges` wheels are platform-dependent; if `pip install` fails to build
-them, install via conda/mamba instead (see below) or install `pyBigWig`/`pyranges` from
-conda-forge/bioconda first, then `pip install crestgv` in the same environment.
-
-### From source
-
-```bash
-git clone https://github.com/Genome-Function-Initiative-Oxford/CREST-GV.git
-cd CREST-GV
-pip install -e .
-```
-
-### Conda/mamba environment (alternative)
+`pyBigWig` and `pyranges` wheels are platform-dependent and can fail to build with plain
+`pip`; installing them from conda-forge/bioconda first avoids that.
 
 ```bash
 git clone https://github.com/Genome-Function-Initiative-Oxford/CREST-GV.git
@@ -42,6 +28,16 @@ mamba env create --file=envs/environment.yml   # or: conda env create --file=env
 conda activate crestgv
 pip install -e .
 ```
+
+### From source (plain pip)
+
+```bash
+git clone https://github.com/Genome-Function-Initiative-Oxford/CREST-GV.git
+cd CREST-GV
+pip install -e .
+```
+
+If this fails to build `pyBigWig`/`pyranges`, use the conda/mamba route above instead.
 
 ### Note on peak calling
 
