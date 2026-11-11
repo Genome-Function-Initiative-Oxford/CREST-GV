@@ -1,7 +1,7 @@
 """Fig. 5 -- Analysis of user-provided data with CREST-GV.
 
-Two worked examples, run with the refactored package
-(CREST-GV_newCode/src/crestgv), not the precomputed resource:
+Two worked examples, run with the refactored package (this repo's own
+src/crestgv), not the precomputed resource:
 
 (a) Held-out collection re-upload: the `cad` collection re-analysed via the
     in-house-collection code path (same bigwigs/peaks, accessed as if a user
@@ -15,7 +15,7 @@ Two worked examples, run with the refactored package
 
 Run time for each is reported (wall-clock, this run).
 
-Requires CREST-GV_newCode's package on the path and a symlinked in-house shim
+Requires this repo's own src/crestgv on the path and a symlinked in-house shim
 for `cad` (see paper_analysis/scripts/build_cad_upload_shim.sh).
 
 Run from the repo root:
@@ -33,8 +33,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 from palette import apply_base_style, SERIES_1, SERIES_2, GRIDLINE, DIVERGING_POS, DIVERGING_NEG
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-NEWCODE_SRC = os.path.join(os.path.dirname(ROOT), "CREST-GV_newCode", "src")
-sys.path.insert(0, NEWCODE_SRC)
+PKG_SRC = os.path.join(os.path.dirname(ROOT), "src")
+sys.path.insert(0, PKG_SRC)
 from crestgv import crestgv  # noqa: E402
 
 GENETICS_BASE = "/project/Wellcome_Discovery/shared/imputed_genetics_per_trait_collection"

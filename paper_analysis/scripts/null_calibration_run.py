@@ -1,7 +1,7 @@
 """Run CREST-GV on every null variant replicate, across all 11 atlas collections.
 
-Uses the bug-fixed CREST-GV_newCode package (division-by-zero guards matter
-here -- a random null set is exactly the kind of input that could plausibly
+Uses the bug-fixed package (this repo's own src/crestgv; division-by-zero
+guards matter here -- a random null set is exactly the kind of input that could plausibly
 hit a degenerate p_succes or zero-variance collection). For each (trait,
 replicate, collection) triple, records raw Z and P for every cell type.
 Results are appended per-replicate to one TSV per trait (resumable: reps
@@ -19,8 +19,8 @@ import time
 import pandas as pd
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-NEWCODE_SRC = os.path.join(os.path.dirname(ROOT), "CREST-GV_newCode", "src")
-sys.path.insert(0, NEWCODE_SRC)
+PKG_SRC = os.path.join(os.path.dirname(ROOT), "src")
+sys.path.insert(0, PKG_SRC)
 from crestgv import crestgv  # noqa: E402
 
 NULL_DIR = os.path.join(ROOT, "data", "null_calibration")
