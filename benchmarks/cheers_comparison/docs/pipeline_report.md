@@ -456,8 +456,8 @@ A review of CREST-GV's source code surfaced several hardening opportunities
 `Z_norm` analogous to the `bigWigAverageOverBed` failure mode found in
 Section 5.1, and the exact-binomial `pmf`/`sf` columns underflowing to exactly
 0.0 for strong signals). These have since been fixed in the refactored
-`crestgv` package released alongside the paper (see this repository's own
-`CHANGELOG.md`) and are orthogonal to the comparison results above, which use
+`crestgv` package released alongside the paper, and are orthogonal to the
+comparison results above, which use
 CREST-GV's already-computed, supported output columns (`CREST-GV_pval`,
 `CREST-GV_pval_norm`).
 

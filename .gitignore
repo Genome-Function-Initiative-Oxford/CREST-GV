@@ -7,3 +7,10 @@ dist/
 .ipynb_checkpoints/
 output/
 *.bw.bai
+
+# Local-only copies of cluster data, and the docs describing/logging work on this
+# repo. Never committed/pushed -- too large, or for Simone's own reference only.
+local_data/
+DATA_SOURCES.md
+CHANGELOG.md
+WORK_LOG.md
