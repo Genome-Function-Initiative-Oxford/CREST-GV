@@ -5,7 +5,7 @@
     standardisation.
 
 Trait shown: red_blood_cell_traits (one of the four traits highlighted in the
-Results; chosen here for consistency with Fig. 1e and Fig. 2, which use the
+Results; chosen here for consistency with Fig. 2 and Fig. 3, which use the
 same four traits).
 
 Run from the repo root:

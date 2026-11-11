@@ -1,4 +1,4 @@
-"""Fig. 1e -- CREST-GV enrichment across four GWAS traits.
+"""Fig. 2 -- CREST-GV enrichment across four GWAS traits.
 
 Standardised scores (Z-tilde) for the top 10 cell types per trait (by score,
 not restricted to significance -- union across the 4 traits), across heart
@@ -17,13 +17,14 @@ Run from the repo root:
 import os
 import sys
 
+import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.colors import TwoSlopeNorm
 
 sys.path.insert(0, os.path.dirname(__file__))
-from palette import apply_base_style, DIVERGING_NEG, DIVERGING_POS, DIVERGING_MID, INK_MUTED
+from palette import apply_base_style, INK_MUTED, INK_PRIMARY
 from stats_utils import bh_fdr_mask
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -69,9 +70,9 @@ def main():
 
     vmax = np.nanmax(np.abs(sub.values))
     norm = TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)
-    cmap = plt.cm.colors.LinearSegmentedColormap.from_list(
-        "diverging", [DIVERGING_NEG, DIVERGING_MID, DIVERGING_POS]
-    )
+    # coolwarm_r (not coolwarm) so positive enrichment stays blue and negative
+    # stays red, matching the sign convention used in the other figures.
+    cmap = plt.cm.coolwarm_r
 
     im = ax.imshow(sub.values, aspect="auto", cmap=cmap, norm=norm)
     ax.set_xticks(range(len(TRAIT_LABELS)))
@@ -83,12 +84,13 @@ def main():
     for row, cell_type in enumerate(sub.index):
         for col, trait in enumerate(TRAIT_LABELS):
             if sub_sig.loc[cell_type, trait]:
-                ax.text(col, row, "*", ha="center", va="center", fontsize=8, color=INK_MUTED)
+                ax.text(col, row, "*", ha="center", va="center", fontsize=9, color="white",
+                        path_effects=[pe.withStroke(linewidth=1.2, foreground=INK_PRIMARY)])
 
     cbar = fig.colorbar(im, ax=ax, shrink=0.5, pad=0.02)
     cbar.set_label(r"Standardised score ($\tilde{Z}$)", color=INK_MUTED)
 
-    ax.set_title(f"e   Top {TOPK} cell types per trait, union (* = BH-FDR q < {QTHR})", loc="left", fontsize=11)
+    ax.set_title(f"Top {TOPK} cell types per trait, union (* = BH-FDR q < {QTHR})", loc="left", fontsize=11)
     fig.tight_layout()
 
     out_base = os.path.join(ROOT, "figures", "Fig3_cross_trait_heatmap")

@@ -1,4 +1,4 @@
-"""Fig. 2e-f -- Analysis of user-provided data with CREST-GV.
+"""Fig. 3e-f -- Analysis of user-provided data with CREST-GV.
 
 Two worked examples, run with the refactored package (this repo's own
 src/crestgv), not the precomputed resource:

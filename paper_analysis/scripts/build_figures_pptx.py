@@ -1,18 +1,19 @@
-"""Assemble the main manuscript figures (Fig. 1-2) into a single PowerPoint deck,
+"""Assemble the main manuscript figures (Fig. 1-3) into a single PowerPoint deck,
 one A4-landscape slide per slide image, with the slide image plus the
 corresponding slice of its legend text as a caption below.
 
-Fig. 1 (5 panels, a-e) and Fig. 2 (6 panels, a-f) are each merges of what used
+Fig. 1 (4 panels, a-d) and Fig. 3 (6 panels, a-f) are each merges of what used
 to be several separate figures. Per Simone, a figure's panels should sit
 together on one composited image rather than just be labelled as parts of the
-same figure across separate slides/pages -- so Fig. 1a-d and all of Fig. 2a-f
-are each a single composite image (see scripts/compose_figures.py). Fig. 1e
-(the cross-trait heatmap) is the one exception: its tall, many-row layout
-doesn't composite cleanly alongside a-d, so it stays on its own slide.
+same figure across separate slides/pages -- so Fig. 1a-d and all of Fig. 3a-f
+are each a single composite image (see scripts/compose_figures.py). Fig. 2
+(the cross-trait heatmap) is its own standalone figure -- its tall, many-row
+layout doesn't composite cleanly alongside other panels, and per Simone it's
+a separate figure number rather than a panel of Fig. 1.
 
 Legend text here is a plain-text transcription of the legends in
 MANUSCRIPT.tex's "Figure legends" section (kept in sync by hand -- there are
-only 2 of them).
+only 3 of them).
 
 Run from the repo root (after scripts/compose_figures.py has produced the
 composite images):
@@ -58,18 +59,18 @@ FIGURES = [
             "c, Distributions of raw enrichment scores (Z) for each chromatin accessibility "
             "collection, showing collection-specific differences in scale, for red blood cell "
             "traits (one of the four traits highlighted in Results; chosen for consistency with "
-            "panel e and Fig. 2, which use the same four traits). "
+            "Fig. 2 and Fig. 3, which use the same four traits). "
             "d, Distributions of standardised enrichment scores (Z̃) after within-collection "
-            "standardisation, same trait and cell types. (Continues as Fig. 1e on the next slide.)"
+            "standardisation, same trait and cell types."
         ),
         "placeholder": "Image not yet available -- run scripts/compose_figures.py first.",
     },
     {
-        "num": 1,
-        "title": "Figure 1 (e)",
+        "num": 2,
+        "title": "Figure 2",
         "image": os.path.join(FIG_DIR, "Fig3_cross_trait_heatmap.png"),
         "legend": (
-            "e, CREST-GV enrichment across four GWAS traits: standardised CREST-GV "
+            "Fig. 2 | CREST-GV enrichment across four GWAS traits. Standardised CREST-GV "
             "enrichment scores (Z̃) for the top 10 cell types by score for each of heart rate, "
             "red blood cell traits, type 1 diabetes and type 2 diabetes (union across the four "
             "traits, not restricted to significance). Rows are grouped by the trait each cell "
@@ -79,11 +80,11 @@ FIGURES = [
         ),
     },
     {
-        "num": 2,
-        "title": "Figure 2 (a-f)",
-        "image": os.path.join(FIG_DIR, "Fig2_abcdef_composite.png"),
+        "num": 3,
+        "title": "Figure 3 (a-f)",
+        "image": os.path.join(FIG_DIR, "Fig3_abcdef_composite.png"),
         "legend": (
-            "Fig. 2 | Cell type rankings and analysis of user-provided data with CREST-GV. "
+            "Fig. 3 | Cell type rankings and analysis of user-provided data with CREST-GV. "
             "Top and bottom 10 standardised enrichment scores (Z̃) across all collections for "
             "a, heart rate; b, red blood cell traits; c, type 1 diabetes; and d, type 2 diabetes. "
             "Bars are coloured by sign; asterisks mark cell types with Benjamini-Hochberg "
