@@ -13,11 +13,13 @@ Fig. 1a-d -> Fig1_abcd_composite.{png,pdf}:
        own).
     c-d, Fig2_standardisation.png (already a single image with both panels
          labelled and stacked by fig2_standardisation.py).
-Fig. 1e (the cross-trait heatmap, Fig3_cross_trait_heatmap.{png,pdf}) is NOT
-included here -- per Simone, its tall, many-row layout doesn't composite
-cleanly alongside a-d, so it stays on its own page/image.
 
-Fig. 2a-f -> Fig2_abcdef_composite.{png,pdf}: stacks Fig4_per_trait_rankings.png
+Fig. 2 (the cross-trait heatmap, Fig3_cross_trait_heatmap.{png,pdf}) is its
+own standalone figure, built by fig3_cross_trait_heatmap.py -- not composited
+here, per Simone: its tall, many-row layout doesn't sit well alongside other
+panels, and it's its own figure number now rather than a panel of Fig. 1.
+
+Fig. 3a-f -> Fig3_abcdef_composite.{png,pdf}: stacks Fig4_per_trait_rankings.png
 (a-d, already labelled) above Fig5_upload_example.png (e-f, already labelled).
 
 Run from the repo root:
@@ -117,7 +119,7 @@ def main():
             mpimg.imread(os.path.join(FIG_DIR, "Fig4_per_trait_rankings.png")),
             mpimg.imread(os.path.join(FIG_DIR, "Fig5_upload_example.png")),
         ],
-        os.path.join(FIG_DIR, "Fig2_abcdef_composite"),
+        os.path.join(FIG_DIR, "Fig3_abcdef_composite"),
     )
 
 

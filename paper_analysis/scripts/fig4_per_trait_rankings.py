@@ -1,4 +1,4 @@
-"""Fig. 4 -- Cell type rankings for the four GWAS traits.
+"""Fig. 3a-d -- Cell type rankings for the four GWAS traits.
 
 Top and bottom 10 standardised enrichment scores (Z-tilde) across all
 collections for (a) heart rate, (b) red blood cell traits, (c) type 1
