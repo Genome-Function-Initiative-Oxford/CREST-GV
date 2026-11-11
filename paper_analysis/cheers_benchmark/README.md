@@ -22,8 +22,8 @@ CREST-GV score/p-value instead of the old (unfiltered-collection) standardisatio
   own output was degenerate there (p = 0.0 for all 19 cell types), not a CREST-GV issue.
   A few more pairs have `rho_vs_raw` = NaN for the same reason on the *raw* (unstandardised)
   CREST-GV p-value specifically (it underflows to 0 for strong/large-N signals — the
-  already-documented CREST-GV pmf/sf/raw-p-value underflow issue, see
-  this repo's `CHANGELOG.md`, point 5); the standardised p-value (`rho_vs_norm`, the
+  already-documented CREST-GV pmf/sf/raw-p-value underflow issue); the standardised
+  p-value (`rho_vs_norm`, the
   one actually reported) is unaffected in those cases and was used as the primary
   statistic throughout.
 

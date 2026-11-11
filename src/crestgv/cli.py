@@ -1,6 +1,6 @@
 """Command-line entry point for CREST-GV.
 
-Fixes applied relative to the pre-0.3.0 CLI (see CHANGELOG.md):
+Fixes applied relative to the pre-0.3.0 CLI:
   * removed the ``number_of_folds``/``lessNG``/``greater25k`` flags, which no
     longer correspond to anything in ``crestgv.core.crestgv`` and made every
     invocation crash with ``TypeError``.
