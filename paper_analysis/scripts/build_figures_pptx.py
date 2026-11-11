@@ -1,24 +1,21 @@
 """Assemble the main manuscript figures (Fig. 1-2) into a single PowerPoint deck,
-one A4-landscape slide per source image, with the already-generated panel image
-(which already contains all of that image's subfigures, laid out by matplotlib)
-plus the corresponding slice of its legend text as a caption below.
+one A4-landscape slide per slide image, with the slide image plus the
+corresponding slice of its legend text as a caption below.
 
 Fig. 1 (5 panels, a-e) and Fig. 2 (6 panels, a-f) are each merges of what used
-to be several separate figures; the underlying image files are unchanged, so
-each still gets its own slide, labelled with just the panel letters it covers
-(e.g. "Figure 1 (c-d)") rather than one slide per figure number.
-
-Fig. 1a-b has no slide image yet -- it depicts the web application and a
-framework diagram as a placeholder screenshot montage (framework diagram
-doesn't exist as an asset at all). Its slide carries the placeholder image
-that is available plus the legend text, so the layout is ready to receive the
-final artwork once it exists.
+to be several separate figures. Per Simone, a figure's panels should sit
+together on one composited image rather than just be labelled as parts of the
+same figure across separate slides/pages -- so Fig. 1a-d and all of Fig. 2a-f
+are each a single composite image (see scripts/compose_figures.py). Fig. 1e
+(the cross-trait heatmap) is the one exception: its tall, many-row layout
+doesn't composite cleanly alongside a-d, so it stays on its own slide.
 
 Legend text here is a plain-text transcription of the legends in
 MANUSCRIPT.tex's "Figure legends" section (kept in sync by hand -- there are
 only 2 of them).
 
-Run from the repo root:
+Run from the repo root (after scripts/compose_figures.py has produced the
+composite images):
     python scripts/build_figures_pptx.py
 """
 
@@ -43,8 +40,8 @@ INK = RGBColor(0x1A, 0x1A, 0x1A)
 FIGURES = [
     {
         "num": 1,
-        "title": "Figure 1 (a-b)",
-        "image": os.path.join(ROOT, "figures", "WEB_crestgv_overview.png"),
+        "title": "Figure 1 (a-d)",
+        "image": os.path.join(FIG_DIR, "Fig1_abcd_composite.png"),
         "legend": (
             "Fig. 1 | Overview and standardisation of CREST-GV enrichment scores "
             "(panel b is a placeholder figure). "
@@ -57,23 +54,15 @@ FIGURES = [
             "right-tailed P-value. "
             "b, The CREST-GV web application, providing access to precomputed results for "
             "1,125 GWAS traits and analysis of user-provided variant sets and chromatin "
-            "accessibility collections. (Continues as Fig. 1c-e over the next two slides.)"
-        ),
-        "placeholder": "Image not yet available -- requires the web application screenshot "
-                        "and framework diagram (external assets, not generated in paper_analysis).",
-    },
-    {
-        "num": 1,
-        "title": "Figure 1 (c-d)",
-        "image": os.path.join(FIG_DIR, "Fig2_standardisation.png"),
-        "legend": (
+            "accessibility collections. "
             "c, Distributions of raw enrichment scores (Z) for each chromatin accessibility "
             "collection, showing collection-specific differences in scale, for red blood cell "
             "traits (one of the four traits highlighted in Results; chosen for consistency with "
             "panel e and Fig. 2, which use the same four traits). "
             "d, Distributions of standardised enrichment scores (Z̃) after within-collection "
-            "standardisation, same trait and cell types."
+            "standardisation, same trait and cell types. (Continues as Fig. 1e on the next slide.)"
         ),
+        "placeholder": "Image not yet available -- run scripts/compose_figures.py first.",
     },
     {
         "num": 1,
@@ -91,21 +80,14 @@ FIGURES = [
     },
     {
         "num": 2,
-        "title": "Figure 2 (a-d)",
-        "image": os.path.join(FIG_DIR, "Fig4_per_trait_rankings.png"),
+        "title": "Figure 2 (a-f)",
+        "image": os.path.join(FIG_DIR, "Fig2_abcdef_composite.png"),
         "legend": (
             "Fig. 2 | Cell type rankings and analysis of user-provided data with CREST-GV. "
             "Top and bottom 10 standardised enrichment scores (Z̃) across all collections for "
             "a, heart rate; b, red blood cell traits; c, type 1 diabetes; and d, type 2 diabetes. "
             "Bars are coloured by sign; asterisks mark cell types with Benjamini-Hochberg "
-            "FDR q < 0.10. (Continues as Fig. 2e-f on the next slide.)"
-        ),
-    },
-    {
-        "num": 2,
-        "title": "Figure 2 (e-f)",
-        "image": os.path.join(FIG_DIR, "Fig5_upload_example.png"),
-        "legend": (
+            "FDR q < 0.10. "
             "e, Held-out collection re-upload: the cad collection re-analysed through the "
             "in-house-collection code path (same bigWig tracks and peak calls, processed as if "
             "newly uploaded), compared against its precomputed reference-atlas enrichment score "
@@ -115,6 +97,7 @@ FIGURES = [
             "Results (osteoporosis), run fresh against all 11 reference collections; top 10 "
             "standardised scores shown."
         ),
+        "placeholder": "Image not yet available -- run scripts/compose_figures.py first.",
     },
 ]
 

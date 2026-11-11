@@ -88,7 +88,7 @@ def main():
     cbar = fig.colorbar(im, ax=ax, shrink=0.5, pad=0.02)
     cbar.set_label(r"Standardised score ($\tilde{Z}$)", color=INK_MUTED)
 
-    ax.set_title(f"Top {TOPK} cell types per trait, union (* = BH-FDR q < {QTHR})", loc="left", fontsize=11)
+    ax.set_title(f"e   Top {TOPK} cell types per trait, union (* = BH-FDR q < {QTHR})", loc="left", fontsize=11)
     fig.tight_layout()
 
     out_base = os.path.join(ROOT, "figures", "Fig3_cross_trait_heatmap")
