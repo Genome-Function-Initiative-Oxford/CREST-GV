@@ -1,0 +1,104 @@
+S-LDSC comparison -- what's needed (4 traits: heart rate, red blood cell traits,
+type 1 diabetes, type 2 diabetes)
+Status: deferred (see MANUSCRIPT.tex \todo on S-LDSC)
+
+Why we want this analysis
+--------------------------
+S-LDSC (stratified LD score regression) is the field-standard method for
+partitioning trait heritability across functional/cell-type annotations using
+full GWAS summary statistics. CREST-GV's own enrichment method is benchmarked
+against CHEERS in the paper already (a peak-overlap-based method, same family
+as CREST-GV), but S-LDSC is a different, independently-motivated approach
+(heritability partitioning vs. variant-overlap enrichment) and is what
+reviewers at a venue like Nature Methods would expect to see as external
+validation that CREST-GV's enrichment rankings agree with an established,
+widely-used orthogonal method. Without it, the CHEERS comparison alone may
+look like validation against a similar method rather than a genuinely
+independent one.
+
+SCOPING DECISION: one GWAS study per trait, not pooled across all studies
+mapped to that trait. Standard S-LDSC practice (one flagship, well-powered
+GWAS per trait); pooling summary stats across heterogeneous studies is
+unusual and can introduce artifacts. Keeps item 1 (and the resulting table)
+tractable -- 4 files instead of a per-trait compilation across many studies.
+Selection criteria for the one study per trait (to apply once we resume):
+  - full summary statistics publicly available (GWAS Catalog v2 API reports
+    this directly: full_summary_stats_available + FTP link)
+  - European ancestry, to match the 1000 Genomes EUR reference panel used for
+    LD scores (ancestry mismatch between study and reference panel biases
+    S-LDSC results)
+  - largest sample size among studies meeting the above
+Caveat for later: CREST-GV's own lead-variant+LD-proxy set per trait is
+pooled across potentially many GWAS Catalog studies (see
+local_data/genetic_variants/*.bed), so the single study picked here won't be
+an exact match to that pooled definition -- acceptable simplification, worth
+one sentence in Methods if this analysis makes it into the paper.
+
+[NEEDS COLLEAGUE]
+1. Genome-wide GWAS summary statistics, one file per trait
+   - Per-SNP: rsID, chr:pos, A1/A2, effect size (beta or OR) + SE (or Z-score),
+     P-value, sample size N
+   - For ALL tested SNPs, not just genome-wide-significant hits
+   - Ideally the same underlying GCST study CREST-GV already uses for that trait
+   - STATUS: NOT YET AVAILABLE. The internal GWAS Catalog associations file
+     (/ceph/project/Wellcome_Discovery/sergeant/gwas_database/imputation/clean/associations.tsv)
+     only has curated top-hit rows (pvalue, risk_allele_freq, allele,
+     reported_gene, or_or_beta) -- no SE, no N, capped at significance
+     threshold. Cannot be used for S-LDSC regardless of filtering.
+   - GWASCatalogTools repo (cloned at
+     /project/Wellcome_Discovery/sriva/Git/GWASCatalogTools) builds lead-SNP +
+     LD-proxy sets per trait (same category of input CREST-GV's own method
+     uses) -- also not genome-wide sumstats. Its cleaned output
+     (results/clean/associations.tsv / traits.tsv) does retain the GCST study
+     accession per trait, which could be used as a lookup key to check the
+     public GWAS Catalog Summary Statistics FTP for full sumstats availability.
+
+[CAN DO INDEPENDENTLY -- public download]
+2. baselineLD v2.2 model (~97 annotations)
+   - One-time public download (Price lab / Broad), reusable across projects
+   - STATUS: not checked yet whether already present elsewhere on the cluster
+
+[CAN DO INDEPENDENTLY -- public download, needs liftover to hg38]
+3. 1000 Genomes EUR reference panel, plink format
+   - Must match genome build -- CREST-GV is on hg38; standard baselineLD/1000G
+     LDSC bundles are hg19, so a liftover step is likely needed
+   - STATUS: not checked yet
+
+[CAN DO INDEPENDENTLY -- public download]
+4. HapMap3 SNP list
+   - One-time public download, standard practice to restrict regression to
+     this well-imputed SNP set
+   - STATUS: not checked yet
+
+[CAN DO INDEPENDENTLY -- built from data CREST-GV already has]
+5. Per-collection chromatin-accessibility annotations as .annot.gz files
+   - Can be built directly from the existing LanceOtron peak calls already in
+     CREST-GV -- no new data needed, just reformatting into LDSC's annotation
+     file format (one per chromosome per collection)
+
+[CAN DO INDEPENDENTLY -- public install]
+6. The ldsc / S-LDSC software itself (github.com/bulik/ldsc or a maintained
+   fork)
+   - One-time setup
+
+Items 2, 3, 4, 6 are one-time setup, reusable regardless of trait count.
+Item 1 (genome-wide summary stats for the 4 specific studies) is the only
+per-trait blocker and the reason this analysis stays deferred.
+
+Scaling note: this requirements list is for the 4 highlighted traits only.
+Extending to a systematic summary across all 1,125 traits in the atlas would
+multiply the data-acquisition problem in item 1 by ~280x and is a much bigger
+scope decision, not attempted here.
+
+Original (existing) directories for the 4 traits
+-------------------------------------------------
+/ceph/project/Wellcome_Discovery/sriva/Git/CREST-GV_v2_backup/ALL_GWAS_CATALOG_TRAITS/heart_rate/
+/ceph/project/Wellcome_Discovery/sriva/Git/CREST-GV_v2_backup/ALL_GWAS_CATALOG_TRAITS/red_blood_cell_traits/
+/ceph/project/Wellcome_Discovery/sriva/Git/CREST-GV_v2_backup/ALL_GWAS_CATALOG_TRAITS/type_1_diabetes_mellitus/
+/ceph/project/Wellcome_Discovery/sriva/Git/CREST-GV_v2_backup/ALL_GWAS_CATALOG_TRAITS/type_2_diabetes_mellitus/
+
+Each contains CREST-GV's own computed enrichment output per collection
+(*_statistics_CREST-GV.csv) -- not the original GWAS Catalog study accessions
+or lead/proxy variant lists used as input. Useful for cross-checking CREST-GV's
+own results, but not a source of genome-wide summary statistics (see item 1
+above).

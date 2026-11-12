@@ -30,7 +30,8 @@ composite cleanly alongside other panels, so it is its own standalone figure/ima
 | `fig3_cross_trait_heatmap.py` | Fig. 2 | Standardised scores for the top 10 cell types per trait by score (union across the 4 highlighted traits, not restricted to significance; 36 cell types), coolwarm diverging palette (reversed so positive stays blue, negative stays red), asterisks mark Benjamini-Hochberg FDR q<0.10 |
 | `fig4_per_trait_rankings.py` | Fig. 3a-d | Top/bottom 10 standardised scores per trait, 4 panels, FDR-significant hits marked |
 | `fig5_upload_example.py` | Fig. 3e-f | **(e)** The `cad` collection re-analysed via the in-house-upload code path, compared to its precomputed atlas result — concordance is near-exact (differences ~1e-13, floating-point noise only). **(f)** A trait not among the four highlighted in Results (`osteoporosis`) run fresh against all 11 collections, exactly as a first-time upload would be processed. Run times reported for both. |
-| `compose_figures.py` | Fig. 1a-d / Fig. 3a-f | Assembles `WEB_crestgv_overview.png` (b, placeholder) + a placeholder box (a) + `fig2_standardisation`'s output (c-d) into `Fig1_abcd_composite.{png,pdf}`; stacks `fig4_per_trait_rankings` (a-d) above `fig5_upload_example` (e-f) into `Fig3_abcdef_composite.{png,pdf}` |
+| `fig1a_framework_diagram.py` | Fig. 1a | Schematic of the enrichment framework (trait/background variants -> open chromatin intersection -> Z-score -> standardisation -> P-value); no numbers of its own |
+| `compose_figures.py` | Fig. 1a-d / Fig. 3a-f | Assembles `fig1a_framework_diagram`'s output (a) + `WEB_crestgv_overview.png` (b, placeholder) + `fig2_standardisation`'s output (c-d) into `Fig1_abcd_composite.{png,pdf}`; stacks `fig4_per_trait_rankings` (a-d) above `fig5_upload_example` (e-f) into `Fig3_abcdef_composite.{png,pdf}` |
 | `suppfig_qc_distributions.py` | Supp. Fig. 1 | QC prediction-score histogram with Good/Decent/Bad thresholds shaded |
 | `suppfig_cheers_scatter.py` | Supp. Fig. 3 | CHEERS-vs-CREST-GV concordance scatter, per collection and pooled |
 | `null_calibration_analyze.py` | Supp. Fig. 2 | Null calibration QQ-plot and empirical-FPR-vs-nominal summary (see `null_calibration/README.md`) |
@@ -71,6 +72,7 @@ cluster. All other scripts only need the `data/` files in this folder.
 ```bash
 pip install -e ..   # installs crestgv itself, used by fig5_upload_example.py
 cd paper_analysis
+python3 scripts/fig1a_framework_diagram.py
 python3 scripts/fig2_standardisation.py
 python3 scripts/fig3_cross_trait_heatmap.py
 python3 scripts/fig4_per_trait_rankings.py

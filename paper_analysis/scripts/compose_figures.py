@@ -6,8 +6,8 @@ pages. This script builds those composites from the already-generated panel
 images -- it doesn't recompute anything, just arranges existing PNGs.
 
 Fig. 1a-d -> Fig1_abcd_composite.{png,pdf}:
-    a, placeholder box (enrichment framework diagram doesn't exist as an
-       asset yet).
+    a, Fig1a_framework_diagram.png (schematic built by
+       fig1a_framework_diagram.py; panel letter baked in).
     b, WEB_crestgv_overview.png (raw web-app screenshot montage, placeholder
        -- labelled 'b' here since the source image has no panel label of its
        own).
@@ -31,10 +31,8 @@ import sys
 
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
 
 sys.path.insert(0, os.path.dirname(__file__))
-from palette import INK_MUTED
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FIG_DIR = os.path.join(ROOT, "figures")
@@ -63,11 +61,14 @@ def stack_rows(images, out_base, width_in=10):
 
 def main():
     # --- Fig. 1a-d ---
+    a_img = mpimg.imread(os.path.join(FIG_DIR, "Fig1a_framework_diagram.png"))
     b_img = mpimg.imread(os.path.join(FIG_DIR, "WEB_crestgv_overview.png"))
     cd_img = mpimg.imread(os.path.join(FIG_DIR, "Fig2_standardisation.png"))
 
     b_h, b_w = b_img.shape[0], b_img.shape[1]
-    a_w_frac = 0.35  # panel a (placeholder box) width, as a fraction of panel b's width
+    a_h, a_w = a_img.shape[0], a_img.shape[1]
+    # scale panel a to panel b's height, then express its width as a fraction of b_w
+    a_w_frac = (a_w * (b_h / a_h)) / b_w
     row1_w = b_w * (1 + a_w_frac)
     row1_h = b_h
     row2_w, row2_h = cd_img.shape[1], cd_img.shape[0]
@@ -84,15 +85,10 @@ def main():
     ax_b = fig.add_subplot(gs_row1[0, 1])
     ax_cd = fig.add_subplot(gs[1])
 
-    ax_a.add_patch(Rectangle((0, 0), 1, 1, transform=ax_a.transAxes,
-                              facecolor="#f0efec", edgecolor="#cfcdc6", linewidth=1))
-    ax_a.text(0.06, 0.94, "a", transform=ax_a.transAxes, fontsize=13, fontweight="bold", va="top", ha="left")
-    ax_a.text(0.5, 0.5, "Enrichment framework\n(diagram not yet made)",
-              transform=ax_a.transAxes, fontsize=10, color=INK_MUTED, ha="center", va="center", wrap=True)
+    ax_a.imshow(a_img, aspect="auto")
     ax_a.set_xticks([])
     ax_a.set_yticks([])
-    for spine in ax_a.spines.values():
-        spine.set_visible(False)
+    ax_a.axis("off")
 
     ax_b.imshow(b_img)
     ax_b.text(0.02, 0.97, "b", transform=ax_b.transAxes, fontsize=13, fontweight="bold",
