@@ -103,15 +103,40 @@ paper_analysis/sldsc/smoketest/heart_rate_h2_smoketest.results. Confirms the
 whole chain (munge -> h2 regression against baselineLD) works on this
 cluster with this exact data format, before committing to the full run.
 
-[REMAINING -- not yet done]
-5. Per-collection chromatin-accessibility annotations as .annot.gz files
-   - Can be built directly from the existing LanceOtron peak calls already in
-     CREST-GV -- no new data needed, just reformatting into LDSC's annotation
-     file format (one per chromosome per collection), using
-     ldsc/make_annot.py (cloned above) or adelaney's
-     00_sldsc_annots_repo/scripts/make_annot_v2.py as a template
-   - This is now the only remaining setup item -- everything else (2,3,4,6)
-     is done and validated.
+[DONE -- 2026-11-18] Item 5: per-cell-type chromatin-accessibility annotations
+SCOPING DECISION: one .annot.gz per cell type (not merged per collection), to
+match CREST-GV's own output granularity exactly and support a true cell-type-
+level ranking comparison against S-LDSC, not just a collection-level one.
+Built directly from CREST-GV's existing LanceOtron peak calls -- no new data
+needed:
+  /project/Wellcome_Discovery/datashare/CREST-GV_collection/<collection>/peaks/<celltype>_L-tron.bed
+  (729 cell types across 15 collections: CAD, calderon, catlas_adult,
+  catlas_fetal, Days7_10_13_17, FireCrest, Granulopoiesis, greenleaf_brain,
+  H1_hESCs, immune_cell, ludwig2019, MPAL, pancreatic_pbmc, super_PBMC,
+  Turner_byDisease)
+Naively calling ldsc/make_annot.py once per (cell type, chromosome) would be
+729*22 = 16,038 subprocess calls (~3s each, mostly import/parse overhead,
+confirmed by timing) ~= 13h serial. Instead wrote
+paper_analysis/sldsc/scripts/build_annots.py, a batched reimplementation of
+the same make_annot.py logic that (a) sorts+merges each peak bed once instead
+of once per chromosome, and (b) loads each chromosome's .bim once and reuses
+it across all 729 cell types. Validated byte-identical output against the
+original ldsc/make_annot.py on a test case (CAD/Endothelial, chr22) before
+running at scale.
+Ran the full build in parallel (6 workers) on the cluster: all 16,038 files
+(729 cell types x 22 autosomes) built successfully in ~35 min wall-clock,
+68MB total, thin-annot format (single ANNOT column, 0/1, in .bim SNP order --
+matches the baselineLD_v2.2 file format already in use). Spot-checked: row
+counts match each chromosome's .bim SNP count exactly; sampled files have
+sensible non-trivial, non-uniform fractions of SNPs flagged (no all-zero or
+all-one files).
+Output: paper_analysis/sldsc/annot/<collection>/<celltype>.<chr>.annot.gz
+-- gitignored (68MB, fully reproducible by rerunning build_annots.py, ~35min
+on this cluster; the script itself and this doc are what's committed).
+
+Items 2-6 are now all done and validated. The only remaining blocker for
+running the real S-LDSC comparison is item 1's last file (red_blood_cell_traits,
+awaiting Martin).
 
 Item 1 (genome-wide summary stats for the 4 specific studies) was the
 per-trait blocker; now resolved for 3/4 traits, with a concrete decision and
