@@ -34,56 +34,88 @@ local_data/genetic_variants/*.bed), so the single study picked here won't be
 an exact match to that pooled definition -- acceptable simplification, worth
 one sentence in Methods if this analysis makes it into the paper.
 
-[NEEDS COLLEAGUE]
+[DONE for 3/4 traits -- provided by Martin Sergeant, 2026-11-18]
 1. Genome-wide GWAS summary statistics, one file per trait
    - Per-SNP: rsID, chr:pos, A1/A2, effect size (beta or OR) + SE (or Z-score),
      P-value, sample size N
    - For ALL tested SNPs, not just genome-wide-significant hits
    - Ideally the same underlying GCST study CREST-GV already uses for that trait
-   - STATUS: NOT YET AVAILABLE. The internal GWAS Catalog associations file
-     (/ceph/project/Wellcome_Discovery/sergeant/gwas_database/imputation/clean/associations.tsv)
-     only has curated top-hit rows (pvalue, risk_allele_freq, allele,
-     reported_gene, or_or_beta) -- no SE, no N, capped at significance
-     threshold. Cannot be used for S-LDSC regardless of filtering.
-   - GWASCatalogTools repo (cloned at
-     /project/Wellcome_Discovery/sriva/Git/GWASCatalogTools) builds lead-SNP +
-     LD-proxy sets per trait (same category of input CREST-GV's own method
-     uses) -- also not genome-wide sumstats. Its cleaned output
-     (results/clean/associations.tsv / traits.tsv) does retain the GCST study
-     accession per trait, which could be used as a lookup key to check the
-     public GWAS Catalog Summary Statistics FTP for full sumstats availability.
+   - STATUS: delivered at
+     /project/Wellcome_Discovery/sergeant/crestgv/summary_statistics/<trait>/
+     Each is a single GWAS Catalog harmonised file (standard columns:
+     chromosome, base_pair_location, effect_allele, other_allele, beta,
+     standard_error, effect_allele_frequency, p_value, rsid, n), genuinely
+     genome-wide (millions of rows, not just top hits):
+       heart_rate              GCST90468177  12.8M rows  PMID 39789286
+       type_1_diabetes_mellitus GCST90824163 56.4M rows  PMID 42062540
+       type_2_diabetes_mellitus GCST90475667 19.7M rows  PMID 39024449
+     Selected by Martin per the criteria above (largest European N with
+     public full sumstats) -- one accession per trait, matches the scoping
+     decision exactly. No further sourcing needed for these 3.
+   - red_blood_cell_traits is NOT a single phenotype in the source data: it's
+     an umbrella of 34 EFO-coded sub-traits (hematocrit, hemoglobin,
+     reticulocyte, erythrocyte count, etc.) pooled across 3 studies (Astle
+     PMID 27863252, van der Harst PMID 23222517, Vuckovic PMID 32888494) --
+     see /project/Wellcome_Discovery/sergeant/crestgv/custom_genetics_bed_files_info_v2/readme.txt.
+     DECISION (2026-11-18): use a single representative sub-trait from the
+     largest source study, consistent with the one-study-per-trait rule used
+     for the other 3 traits -- "erythrocyte count" (GCST90002403) from
+     Vuckovic et al. 2020, N=408,112, European (UK), full summary stats
+     publicly available (confirmed via GWAS Catalog v2 API) -- EFO_0004305,
+     already one of the 34 sub-traits in Martin's own readme list. Ask Martin
+     to pull this one file the same way as the other three:
+     https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90002001-GCST90003000/GCST90002403/harmonised/32888494-GCST90002403-EFO_0004305.h.tsv.gz
+   - STATUS: awaiting the GCST90002403 file from Martin; once that lands,
+     item 1 is fully done for all 4 traits.
 
-[CAN DO INDEPENDENTLY -- public download]
-2. baselineLD v2.2 model (~97 annotations)
-   - One-time public download (Price lab / Broad), reusable across projects
-   - STATUS: not checked yet whether already present elsewhere on the cluster
+[DONE -- 2026-11-18] Items 2, 3, 4, 6: one-time setup
+Found an existing, already-built S-LDSC setup on the cluster from an
+unrelated project (Adam Delaney), reusable as-is, read-only:
+  /project/Wellcome_Discovery/adelaney/Projects/02_sLDSC/00_ref_files/hg38/
+    baselineLD_v2.2/   -- item 2, baselineLD v2.2 (~97 annotations)
+    1000G_EUR_plink/   -- item 3, 1000 Genomes EUR plink, ALREADY hg38
+                           (no liftover needed -- Zenodo bundle
+                           https://zenodo.org/records/10515792 ships both
+                           hg19 and hg38 versions; this is the hg38 one)
+    weights/           -- regression weights (weights.hm3_noMHC, hg38)
+  /project/Wellcome_Discovery/adelaney/Projects/02_sLDSC/00_ref_files/HapMap3_SNPs/
+    list.txt, LDSCORE_hapmap3_snps.tar -- item 4, HapMap3 SNP list (per-chr
+    rsID lists from the Price lab bucket; build-agnostic, no allele info --
+    fine for SNP-list restriction, not for munge_sumstats --merge-alleles;
+    the weights/ files above serve the actual HapMap3-restricted regression)
+Item 6 (ldsc software): the original github.com/bulik/ldsc is Python 2.7
+only (confirmed -- old-style print statements, numpy/pandas/scipy pinned to
+2016-era versions, won't run on any Python 3 here). Used the actively
+maintained Python 3 fork instead: github.com/CBIIT/ldsc, cloned to
+paper_analysis/sldsc/ldsc/. Installed into its own venv
+(paper_analysis/sldsc/sldsc_venv/, NOT committed to git -- 346MB) with
+numpy<2/pandas<2/scipy<1.12/bitarray==2.9.2 (newer numpy 2.x / pandas 3.x
+break ldsc's own regression code -- confirmed via its test suite: 127/167
+tests pass with this pin vs. several core failures with latest versions).
+bedtools (for pybedtools) comes from the cluster's own
+module/package/bedtools/2.29.2.
+VALIDATED END TO END on real data (2026-11-18): ran munge_sumstats.py and
+ldsc.py --h2 on a 500k-SNP subset of the real heart_rate file from item 1
+against the baselineLD_v2.2/1000G_EUR_plink/weights above -- completed
+cleanly, produced sensible numbers (mean chi^2 2.15, intercept 1.06, full
+97-category partitioned-h2 table), see
+paper_analysis/sldsc/smoketest/heart_rate_h2_smoketest.results. Confirms the
+whole chain (munge -> h2 regression against baselineLD) works on this
+cluster with this exact data format, before committing to the full run.
 
-[CAN DO INDEPENDENTLY -- public download, needs liftover to hg38]
-3. 1000 Genomes EUR reference panel, plink format
-   - Must match genome build -- CREST-GV is on hg38; standard baselineLD/1000G
-     LDSC bundles are hg19, so a liftover step is likely needed
-   - STATUS: not checked yet
-
-[CAN DO INDEPENDENTLY -- public download]
-4. HapMap3 SNP list
-   - One-time public download, standard practice to restrict regression to
-     this well-imputed SNP set
-   - STATUS: not checked yet
-
-[CAN DO INDEPENDENTLY -- built from data CREST-GV already has]
+[REMAINING -- not yet done]
 5. Per-collection chromatin-accessibility annotations as .annot.gz files
    - Can be built directly from the existing LanceOtron peak calls already in
      CREST-GV -- no new data needed, just reformatting into LDSC's annotation
-     file format (one per chromosome per collection)
+     file format (one per chromosome per collection), using
+     ldsc/make_annot.py (cloned above) or adelaney's
+     00_sldsc_annots_repo/scripts/make_annot_v2.py as a template
+   - This is now the only remaining setup item -- everything else (2,3,4,6)
+     is done and validated.
 
-[CAN DO INDEPENDENTLY -- public install]
-6. The ldsc / S-LDSC software itself (github.com/bulik/ldsc or a maintained
-   fork)
-   - One-time setup
-
-Items 2, 3, 4, 6 are one-time setup, reusable regardless of trait count.
-Item 1 (genome-wide summary stats for the 4 specific studies) is the only
-per-trait blocker and the reason this analysis stays deferred.
+Item 1 (genome-wide summary stats for the 4 specific studies) was the
+per-trait blocker; now resolved for 3/4 traits, with a concrete decision and
+ask recorded above for the 4th (red_blood_cell_traits).
 
 Scaling note: this requirements list is for the 4 highlighted traits only.
 Extending to a systematic summary across all 1,125 traits in the atlas would
