@@ -99,6 +99,37 @@ Output: paper_analysis/sldsc/h2_baseline/<trait>_baselineLD.{log,results}
 and paper_analysis/sldsc/munged/<trait>.{log,sumstats.gz} -- gitignored
 (reproducible from the raw summary stats + these commands).
 
+[DONE -- 2026-11-24] Custom per-cell-type LD scores (--l2), all 22 chromosomes
+Combined the 729 per-cell-type .annot.gz files (item 5) into one wide
+729-column thin-annot file per chromosome (scripts/combine_annots.py), then
+ran ldsc.py --l2 once per chromosome (--bfile 1000G.EUR.hg38, --ld-wind-cm 1,
+--thin-annot, --print-snps HapMap3 list) to get LD scores for all 729 cell
+types in a single pass over the genotype data per chromosome (22 calls
+instead of 729 x 22). A first attempt at 4-way parallel chromosomes died
+silently, most likely OOM-killed (this cluster node was under heavy memory
+pressure from other users' jobs throughout -- as little as 28-39Gi free out
+of 2.0Ti, swap fully exhausted at times). Restarted serial (nproc=1); ran
+reliably end-to-end, ~27min/chromosome average (faster for smaller
+chromosomes), total wall-clock ~6h40m across chr1-22.
+Output: paper_analysis/sldsc/combined_annot/combined.<chr>.l2.{ldscore.gz,M,M_5_50}
+-- gitignored (22 chromosomes, reproducible via scripts/run_ldscore.py).
+
+[DONE -- 2026-11-24] Per-cell-type LD-score exposure for --h2-cts
+ldsc.py's --ref-ld-chr-cts mechanism expects one independently-readable
+file-prefix per cell type (read via ldscore_fromlist/M_fromlist), not a wide
+multi-column table. Wrote scripts/split_ldscores.py to slice each
+combined.<chr>.l2.ldscore.gz's 729 L2 columns (plus the matching .l2.M /
+.l2.M_5_50 values, confirmed to be in the same column order as the ldscore
+file) into 729 per-cell-type, per-chromosome files:
+paper_analysis/sldsc/combined_annot/by_celltype/<collection>__<celltype>/<collection>__<celltype>.<chr>.l2.{ldscore.gz,M,M_5_50}
+Built the --ref-ld-chr-cts manifest (one line per cell type: name<TAB>prefix)
+at paper_analysis/sldsc/combined_annot/cts.ldcts (729 lines).
+Verified against ldsc/ldscore/{sumstats.py,parse.py} source (cell_type_specific(),
+ldscore_fromlist, M_fromlist, sub_chr) that this file layout and the manifest
+format are exactly what --h2-cts expects.
+Output: gitignored (reproducible via scripts/split_ldscores.py); the splitter
+script and this doc are what's committed.
+
 [DONE -- 2026-11-18] Items 2, 3, 4, 6: one-time setup
 Found an existing, already-built S-LDSC setup on the cluster from an
 unrelated project (Adam Delaney), reusable as-is, read-only:
