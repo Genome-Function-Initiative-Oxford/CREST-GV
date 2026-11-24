@@ -65,8 +65,39 @@ one sentence in Methods if this analysis makes it into the paper.
      already one of the 34 sub-traits in Martin's own readme list. Ask Martin
      to pull this one file the same way as the other three:
      https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST90002001-GCST90003000/GCST90002403/harmonised/32888494-GCST90002403-EFO_0004305.h.tsv.gz
-   - STATUS: awaiting the GCST90002403 file from Martin; once that lands,
-     item 1 is fully done for all 4 traits.
+   - STATUS: delivered by Martin 2026-11-24 at
+     /project/Wellcome_Discovery/sergeant/crestgv/summary_statistics/red_blood_cell_traits/32888494-GCST90002403-EFO_0004305.h.tsv.gz
+     (40.9M rows, correct accession/columns confirmed). Item 1 is now fully
+     done for all 4 traits.
+
+[DONE -- 2026-11-24] munge_sumstats.py + baselineLD_v2.2 validation, full data
+Ran munge_sumstats.py on the full (non-subsampled) summary statistics for all
+4 traits (not just the heart_rate smoketest subset). Column mapping note: the
+red_blood_cell_traits/Vuckovic file uses hm_rsid for its SNP column (not
+rsid like the other 3 files) -- caught via a first failed run, fixed with
+--snp hm_rsid. All 4 munged cleanly, no errors:
+  trait                      SNPs (post-QC)   mean chi^2   lambda GC
+  heart_rate                 7,061,053        1.99         1.55
+  red_blood_cell_traits       7,485,787        3.09         1.69
+  type_1_diabetes_mellitus    7,702,008        1.77         1.07
+  type_2_diabetes_mellitus   15,815,439        2.23         1.89
+Then ran ldsc.py --h2 for all 4 against baselineLD_v2.2 (same flags as the
+earlier heart_rate smoketest: --overlap-annot, --frqfile-chr, --w-ld-chr
+weights.hm3_noMHC), confirming the standard partitioned-h2 pipeline works
+end-to-end on full real data, not just the subsampled smoketest:
+  trait                      h2 (SE)          mean chi^2   intercept
+  heart_rate                 0.150 (0.008)    2.18         1.064
+  type_1_diabetes_mellitus   0.029 (0.003)    1.40         1.037
+  type_2_diabetes_mellitus   0.221 (0.009)    3.27         1.631
+  red_blood_cell_traits      0.250 (0.013)    3.07         1.218
+heart_rate's full-data h2 (0.150) closely matches the 500k-SNP smoketest
+estimate (0.147) -- good internal consistency check. T1D's low h2 is
+consistent with most of its signal concentrating at the HLA locus; T2D's
+elevated intercept (1.63) is typical for a very large multi-cohort
+meta-analysis with sample overlap, not itself a red flag.
+Output: paper_analysis/sldsc/h2_baseline/<trait>_baselineLD.{log,results}
+and paper_analysis/sldsc/munged/<trait>.{log,sumstats.gz} -- gitignored
+(reproducible from the raw summary stats + these commands).
 
 [DONE -- 2026-11-18] Items 2, 3, 4, 6: one-time setup
 Found an existing, already-built S-LDSC setup on the cluster from an
