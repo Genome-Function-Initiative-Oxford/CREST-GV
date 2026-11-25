@@ -166,8 +166,34 @@ Top hit is catlas_adult Beta cells (pancreatic insulin-producing cells),
 followed by Delta/Gamma and Alpha islet cells and pancreatic islets more
 broadly (pancreatic_pbmc collection) -- the textbook-expected pancreatic
 endocrine cell types for T2D.
-red_blood_cell_traits runs the same way next; see this file for an update
-once it completes.
+red_blood_cell_traits completed last: 729 cell types, 52.5 minutes. Top
+hits are erythroid-lineage cell types -- FireCrest ERY (erythroblast) cells
+across differentiation days/sizes, catlas_fetal Erythroblast 1-4, and
+ludwig2019 CFUE (colony-forming-unit erythroid) -- exactly the expected
+lineage for red blood cell trait heritability.
+
+Summary: all 4 traits now have complete, validated --h2-cts cell-type-
+specific results against CREST-GV's own 729 cell types, and in every case
+the top-ranked cell type(s) match the known biology of the trait with no
+manual curation or cherry-picking:
+  trait                      top cell type(s)                 runtime
+  heart_rate                 cardiomyocytes, smooth muscle     53.0 min
+  type_1_diabetes_mellitus   CD4/CD8 memory T cells, Th1/Th17  40.5 min
+  type_2_diabetes_mellitus   pancreatic beta/islet cells       53.5 min
+  red_blood_cell_traits      erythroblasts/erythroid lineage   52.5 min
+This is the core real-data result for the S-LDSC comparison section of the
+manuscript. Full per-cell-type tables (729 rows each, sorted by p-value)
+are at paper_analysis/sldsc/h2_cts/<trait>.cell_type_results.txt
+(gitignored; reproducible via the commands logged above once the LD-score
+build and split, also logged above, are in place).
+
+Not yet done: a direct quantitative cross-comparison between these S-LDSC
+rankings and CREST-GV's own per-collection enrichment output (the
+*_statistics_CREST-GV.csv files under CREST-GV_v2_backup/ALL_GWAS_CATALOG_TRAITS/,
+referenced at the end of this file) -- e.g. rank correlation, or a plot of
+CREST-GV enrichment vs. S-LDSC coefficient per cell type. That comparison,
+plus any figure/table for the manuscript, is the next piece of work if
+wanted.
 
 [DONE -- 2026-11-18] Items 2, 3, 4, 6: one-time setup
 Found an existing, already-built S-LDSC setup on the cluster from an
