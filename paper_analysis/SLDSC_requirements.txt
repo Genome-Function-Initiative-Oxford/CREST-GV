@@ -187,13 +187,60 @@ are at paper_analysis/sldsc/h2_cts/<trait>.cell_type_results.txt
 (gitignored; reproducible via the commands logged above once the LD-score
 build and split, also logged above, are in place).
 
-Not yet done: a direct quantitative cross-comparison between these S-LDSC
-rankings and CREST-GV's own per-collection enrichment output (the
-*_statistics_CREST-GV.csv files under CREST-GV_v2_backup/ALL_GWAS_CATALOG_TRAITS/,
-referenced at the end of this file) -- e.g. rank correlation, or a plot of
-CREST-GV enrichment vs. S-LDSC coefficient per cell type. That comparison,
-plus any figure/table for the manuscript, is the next piece of work if
-wanted.
+[DONE -- 2026-11-25] Rescoped to match the paper's actual atlas, and
+quantitative comparison against CREST-GV's own enrichment scores
+The 729-cell-type/15-collection run above is broader than the manuscript's
+own atlas (\ncoll=11 collections, \nkept=390 QC-kept profiles -- confirmed
+by reading manuscript/MANUSCRIPT.tex and cross-referencing
+paper_analysis/data/CREST-GV_qc_summary_all.csv, the QC pass/fail table
+behind Table~tab:collections). FireCrest, Granulopoiesis, pancreatic_pbmc
+and Turner_byDisease are not part of the paper's atlas at all; catlas_adult
+and catlas_fetal additionally drop to 45/111 and 60/111 cell types after
+QC. Built a restricted --ref-ld-chr-cts manifest
+(paper_analysis/sldsc/combined_annot/cts_paper_atlas.ldcts, 390 lines,
+scripts/build_restricted_manifest.py logic documented inline) and reran
+--h2-cts for all 4 traits against exactly these 390 cell types (same
+baselineLD_v2.2/weights/frqfile flags as before). Runtimes: heart_rate 28.0
+min, type_1_diabetes_mellitus 21.3 min, type_2_diabetes_mellitus 29.2 min,
+red_blood_cell_traits 40.3 min. Top-hit biology unchanged from the
+unrestricted run (cardiomyocytes/smooth muscle, T-cell subsets, pancreatic
+beta cells, erythroid lineage respectively).
+Output: paper_analysis/sldsc/h2_cts_paper_atlas/<trait>.cell_type_results.txt
+(390 rows each) -- gitignored, same reproducibility note as above.
+
+Then ran the quantitative cross-comparison against CREST-GV's own
+standardised enrichment score (CREST-GV_norm column in
+local_data/crest_output/<trait>/<collection>_statistics_CREST-GV.csv,
+390 matched cell types per trait after translating between the two
+collection-naming conventions -- scripts/compare_with_crestgv.py). Spearman
+correlation (S-LDSC coefficient vs CREST-GV standardised Z) was positive
+and significant for all 4 traits:
+  trait                      n      rho      p
+  type_1_diabetes_mellitus    390   0.35   1.6e-12
+  heart_rate                  390   0.28   2.0e-08
+  type_2_diabetes_mellitus    390   0.26   1.4e-07
+  red_blood_cell_traits       390   0.15   2.8e-03
+Top-hit concordance was strong: type_2_diabetes_mellitus showed an EXACT
+match (catlas_adult Beta_1 ranked #1 by both methods, independently, out of
+390); heart_rate and red_blood_cell_traits each method's #1 hit was the
+other method's #2/#3 hit (cardiomyocyte and erythroblast subtypes
+respectively); type_1_diabetes_mellitus both methods' #1 hit was a CD8+ T
+cell population, from different collections (calderon vs catlas_adult),
+each ranked #31/390 by the other method.
+Output: paper_analysis/sldsc/h2_cts_paper_atlas/<trait>.vs_crestgv.tsv
+(per-cell-type merged table) -- gitignored.
+
+This result (both rho values and top-hit concordance) has been written up
+in manuscript/MANUSCRIPT.tex as the "Comparison with S-LDSC" Results and
+Methods subsections, manuscript/SUPPLEMENTARY.tex as "Supplementary Note 2",
+and manuscript/SUP_FIGURE.tex / paper_analysis/figures/SuppFig_SLDSC_scatter.{png,pdf}
+as the accompanying supplementary figure (scripts/suppfig_sldsc_scatter.py),
+replacing the manuscript's long-standing S-LDSC-comparison \todo. Committed
+and pushed to the manuscript's Overleaf repo.
+
+The full, unrestricted 729-cell-type/15-collection run (above) remains on
+disk and is still a valid, broader result -- just not the one written into
+the manuscript, which is scoped to match the rest of the paper.
 
 [DONE -- 2026-11-18] Items 2, 3, 4, 6: one-time setup
 Found an existing, already-built S-LDSC setup on the cluster from an
