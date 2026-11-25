@@ -156,9 +156,13 @@ sanity check of the whole custom pipeline (peaks -> per-celltype annotations
 Output: paper_analysis/sldsc/h2_cts/<trait>.cell_type_results.txt
 (Name, Coefficient, Coefficient_std_error, Coefficient_P_value; 729 rows,
 sorted by p-value) -- gitignored, reproducible from the commands above.
-type_1_diabetes_mellitus, type_2_diabetes_mellitus, red_blood_cell_traits
-run the same way, one at a time; see this file for updates as each
-completes.
+type_1_diabetes_mellitus completed next: 729 cell types, 40.5 minutes.
+Again biologically sensible -- top hits are CD4 memory/naive T cells, CD8
+effector/central memory T cells, and Th1/Th17 precursor cells (FireCrest,
+calderon, super_PBMC collections), exactly the autoimmune-relevant T-cell
+subsets known to drive T1D pathology.
+type_2_diabetes_mellitus, red_blood_cell_traits run the same way, one at a
+time; see this file for updates as each completes.
 
 [DONE -- 2026-11-18] Items 2, 3, 4, 6: one-time setup
 Found an existing, already-built S-LDSC setup on the cluster from an
