@@ -161,8 +161,13 @@ Again biologically sensible -- top hits are CD4 memory/naive T cells, CD8
 effector/central memory T cells, and Th1/Th17 precursor cells (FireCrest,
 calderon, super_PBMC collections), exactly the autoimmune-relevant T-cell
 subsets known to drive T1D pathology.
-type_2_diabetes_mellitus, red_blood_cell_traits run the same way, one at a
-time; see this file for updates as each completes.
+type_2_diabetes_mellitus completed next: 729 cell types, 53.5 minutes.
+Top hit is catlas_adult Beta cells (pancreatic insulin-producing cells),
+followed by Delta/Gamma and Alpha islet cells and pancreatic islets more
+broadly (pancreatic_pbmc collection) -- the textbook-expected pancreatic
+endocrine cell types for T2D.
+red_blood_cell_traits runs the same way next; see this file for an update
+once it completes.
 
 [DONE -- 2026-11-18] Items 2, 3, 4, 6: one-time setup
 Found an existing, already-built S-LDSC setup on the cluster from an
